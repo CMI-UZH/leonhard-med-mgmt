@@ -16,7 +16,7 @@ Since git is not accessible from LeonhardMed, this allows you to edit code on yo
 
 
 ### Example usage for connecting to LeoMed:
-    `code_sync --local_dir mylocaldir/ --remote_dir myremotedir/ --target medinfmk --port 2222`
+`code_sync --local_dir mylocaldir/ --remote_dir myremotedir/ --target medinfmk --port 2222`
 
 ### Prerequisites
 
