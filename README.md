@@ -32,12 +32,12 @@ Host medinfmk login.medinfmk.leonhard.ethz.ch
 ```
 
 ### Notes
-* When you start this script, it will be silent until any file in the local_dir is touched. 
-* You can safely quit code-sync with control-c.
+* When you start this script, it will be silent until any file in the `local_dir` is touched. This is normal!
+* You can safely quit `code_sync` with control-c.
 * The destination directory should not be treated as an active git repo. 
 The destination dir must exist already, but need not already be empty.
 If the destination directory is a git repo already, it will be overwritten with the "git state" of the local git directory. 
-* Do not run git commands from the destination terminal on the destination directory. 
+* **Do not run git commands from the destination terminal** on the destination directory. 
 The destination dir will have its contents synced to exactly match the local dir, including when you checkout a different branch on local. 
-* The sync command adheres to any filters set by .gitignore files within the specified directories.
-It also excludes .git and .ipynb files.
+* The sync command adheres to any filters set by `.gitignore` files within the specified directories.
+It also excludes `.git` and `.ipynb` files.
