@@ -23,12 +23,13 @@ Since git is not accessible from LeonhardMed, this allows you to edit code on yo
 `code_sync` relies on your `~/.ssh/config`, which should contain the following:
 
 ```bash
+ControlMaster auto
+    ControlPath ~/.ssh/control-%r@%h:%p:
+
 Host medinfmk login.medinfmk.leonhard.ethz.ch
     User lkink
     HostName login.medinfmk.leonhard.ethz.ch
     ProxyCommand ssh -Y %r@jump.leomed.ethz.ch -W %h:%p
-    ControlMaster auto
-    ControlPath ~/.ssh/control-%r@%h:%p:
 ```
 
 ### Notes
