@@ -1,7 +1,4 @@
 
-## Wiki
-This repository  contains documentation for using Leonhard Med in the [wiki](https://github.com/CMI-UZH/leonhard-med-mgmt/wiki). 
-
 ## Installation
 * `git clone` the repo and `cd` into it.
 * Run `pip install -e .` to install the repo's python package.
