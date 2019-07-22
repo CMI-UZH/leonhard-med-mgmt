@@ -5,7 +5,7 @@ import os
 import subprocess
 
 cmd_str = 'watchmedo shell-command --recursive --patterns="{local_dir}*" --command="rsync --filter=\':- .gitignore\' ' \
-          '--exclude \'*.ipynb\' --delete-after -rz -e \'ssh -p {port}\' {local_dir} ' \
+          '--exclude \'*.ipynb\' --exclude \'.git\' --delete-after -rz --port {port} {local_dir} ' \
           '{target}:{remote_dir}" {local_dir}'
 
 epilog_str = '''
