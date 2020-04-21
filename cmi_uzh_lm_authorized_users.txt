@@ -7,3 +7,5 @@ Zsolt Balazs
 Jan Bartussek
 Nicolas Perez
 Anna Sintsova
+Mathias Hilty
+Pedro David Wendel Garcia
