@@ -8,6 +8,8 @@ setup(name='leotools',
       python_requires='>3.5.0',
       install_requires=[
             'watchdog',
+            'pyyaml',
+            'argh'
       ],
       entry_points={
           'console_scripts': [
