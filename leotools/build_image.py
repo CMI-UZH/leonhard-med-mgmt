@@ -4,37 +4,49 @@ import argparse
 import os
 import subprocess
 
-cmd_str = 'watchmedo shell-command --recursive --patterns="{local_dir}*" --command="rsync --filter=\':- .gitignore\' ' \
-          '--exclude \'*.ipynb\' --delete-after -rz --port {port} {local_dir} ' \
-          '{target}:{remote_dir}" {local_dir}'
+cmd_str = '''
+
+def_file_path='{def_file}'
+build_dir='$HOME/temp/'
+
+# Open ssh tunnel for the subsequent commands (might need to increase sleep time)
+ssh -f -o ExitOnForwardFailure=yes ohdsi sleep {wait_time}
+
+# Transfer the edited specification file to OHDSI instance (notice -R)
+lftp sftp://{build_machine} -e "mirror -R -P 12 --use-pget-n=1 $def_file_path $build_dir; exit"
+
+# Run 'singularity build' on OHDSI
+ssh {build_machine} "cd $build_dir; specfile=\$(ls -t *.spec | head -n1 | sed 's/\.[^.]*$//'); sudo singularity build \$specfile.sif \$specfile.spec"
+
+# Copy the new image back to LeoMed
+lftp sftp://{build_machine} -e "mirror -P 12 --use-pget-n=1 $build_dir $def_file_path; exit"
+
+'''
 
 epilog_str = '''
 Example for connecting to LeoMed:
-    code_sync --local_dir mylocaldir/ --remote_dir myremotedir/ --target medinfmk --port 2222\n
+    build_image --def_file image.sif --build_machine ohdsi --wait_time 360\n
 
 '''
 
 
-def code_sync(local_dir, remote_dir, target, port=22):
+def build_image(def_file, build_machine, wait_time, ):
     # clean up slashes
-    local_dir = os.path.join(local_dir, '')
-    remote_dir = os.path.join(remote_dir, '')
+    def_file = os.path.join(def_file, '')
 
-    # subprocess.call()
-    cmd = cmd_str.format(local_dir=local_dir, remote_dir=remote_dir, target=target, port=port)
+    cmd = cmd_str.format(def_file=def_file, build_machine=build_machine, wait_time=wait_time)
     subprocess.call(cmd, shell=True)
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, epilog=epilog_str)
-    parser.add_argument('--local_dir', help='the local code directory you want to sync', required=True)
-    parser.add_argument('--remote_dir', help='the remote directory you want to sync', required=True)
-    parser.add_argument('--target', help='specify which remote machine to connect to', required=True)
-    parser.add_argument('--port', type=int, help='ssh port for connecting to remote', default=22)
-
+    parser.add_argument('--def_file', help='the local code directory you want to sync', required=True)
+    parser.add_argument('--build_machine', help='the ssh config key for the machine you want to build the image on', required=True)
+    parser.add_argument('--wait_time', type=int, help='the length of time the ssh connection stays open',
+                        required=False, default=120)
     args = parser.parse_args()
 
-    code_sync(local_dir=args.local_dir, remote_dir=args.remote_dir, target=args.target, port=args.port)
+    build_image(def_file=args.def_file, build_machine=args.build_machine, wait_time=args.wait_time)
 
 
 if __name__ == '__main__':

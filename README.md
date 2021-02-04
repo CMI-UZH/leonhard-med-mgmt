@@ -49,3 +49,10 @@ If the destination directory is a git repo already, it will be overwritten with 
 The destination dir will have its contents synced to exactly match the local dir, including when you checkout a different branch on local. 
 * The sync command adheres to any filters set by `.gitignore` files within the specified directories.
 It also excludes `.git` and `.ipynb` files.
+
+
+## `build_image`
+
+Add the custom packages path to your path in your `~/.bashrc`:
+
+export PATH=$PATH:/cluster/home/lkink/custom_packages/bin/
