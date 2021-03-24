@@ -1,0 +1,12 @@
+# Virtual environment
+.venv
+
+# Python packaging
+leotools.egg-info
+codesync/
+
+# Caching
+__pycache__
+
+# IDEs
+.idea
