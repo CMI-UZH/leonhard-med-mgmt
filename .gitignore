@@ -1,6 +1,10 @@
 # Virtual environment
 .venv
 
+# Testing
+tests/logs/
+.pytest_cache
+
 # Python packaging
 leotools.egg-info
 codesync/
@@ -10,3 +14,6 @@ __pycache__
 
 # IDEs
 .idea
+
+# Local data
+local/

@@ -1,0 +1,22 @@
+cluster:
+  name: medinfmk
+  ssh-key: leomed
+  port: 8100
+  batch_jobs:
+    - batch_job1
+
+batch_job1:
+  name: somename
+  port: 8101
+  duration: 24
+  cpu: 4
+  memory: 10
+  gpu: 1
+  gpu-model: GeForceGTX1080Ti
+
+codesync:
+  cluster: leonhardmed
+  local_dir: something
+  remote_dir: somethingelse
+  port: 2222
+

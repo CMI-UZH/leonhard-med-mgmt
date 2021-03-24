@@ -1,0 +1,8 @@
+# -------------- Requirements for documentation --------------- #
+# Production packages
+-r production.txt
+
+# Documentation
+sphinx
+pydata-sphinx-theme
+recommonmark

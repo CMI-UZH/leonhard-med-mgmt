@@ -29,7 +29,7 @@ with open(path.join(this_directory, 'README.md'), mode='r', encoding='utf-8') as
     LONG_DESCRIPTION = f.read()
 
 # Install requirements
-with open(path.join(this_directory, 'requirements.txt'), mode='r', encoding='utf-8') as f:
+with open(path.join(this_directory, 'requirements/production.txt'), mode='r', encoding='utf-8') as f:
     INSTALL_REQUIREMENTS = f.read().splitlines()
 
 # Classifiers
@@ -38,7 +38,6 @@ CLASSIFIERS = [
     "Environment :: Console",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
-    "Intended Audience :: Healthcare Industry",
     "License :: OSI Approved :: MIT License"
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.7",
