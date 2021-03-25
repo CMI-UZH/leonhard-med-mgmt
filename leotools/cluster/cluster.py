@@ -7,10 +7,9 @@ from abc import ABC, abstractmethod
 
 class Cluster(ABC):
 
-    def __init__(self, ssh_address: str, port: int):
+    def __init__(self, ssh_address: str):
         self.id = None
         self.ssh_address = ssh_address
-        self.port = port
 
     @abstractmethod
     def login(self) -> str:

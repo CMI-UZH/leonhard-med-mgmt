@@ -12,15 +12,17 @@ from leotools.cluster.cluster import Cluster
 
 class LeonhardMed(Cluster):
 
-    def __init__(self, ssh_address: str, port: int):
-        super().__init__(ssh_address=ssh_address, port=port)
+    def __init__(self, ssh_address: str):
+        super().__init__(ssh_address=ssh_address)
         self.id = 'leomed'
+        # TODO: Add binding of connection (for Jupyter batch scripts)
 
     def login(self) -> str:
         """Login to the LeonhardMed cluster"""
 
         # Create a screen
         screen_name = Screen().create(name=self.id)
+        print(screen_name)
 
         # Attach to screen and launch SSH
         terminal = pexpect.spawn(f"screen -r {screen_name}")
@@ -29,7 +31,9 @@ class LeonhardMed(Cluster):
         # Login procedure
         verification_code_success = False
         password_success = False
-        login_success = bool(terminal.expect_exact(['Verification code: ', 'Welcome']))
+        # BUG: Not matching welcome when logging in directly
+        response = terminal.expect_exact(['Verification code', 'Welcome'])
+        login_success = (response == 1)
 
         if not login_success:
             # Verification code
@@ -38,7 +42,7 @@ class LeonhardMed(Cluster):
                 verification_code = getpass.getpass('Verification code: ')
                 terminal.sendline(verification_code)
                 response = terminal.expect_exact(['password', 'Verification code', 'Permission denied'])
-                verification_code_success = True if response == 0 else False
+                verification_code_success = (response == 0)
                 i += 1
 
             # Password
@@ -47,7 +51,7 @@ class LeonhardMed(Cluster):
                 password = getpass.getpass('ETHZ password: ')
                 terminal.sendline(password)
                 response = terminal.expect_exact(['Welcome', 'password', 'Permission denied'])
-                password_success = True if response == 0 else False
+                password_success = (response == 0)
                 i += 1
 
         # Detach from screen and close the terminal
@@ -56,7 +60,7 @@ class LeonhardMed(Cluster):
         terminal.close()
 
         # If error in connection, kill screen and print error
-        if not verification_code_success or not password_success:
+        if not login_success and (not verification_code_success or not password_success):
             time.sleep(1)
             Screen().quit(screen_name)
             if not verification_code_success:
