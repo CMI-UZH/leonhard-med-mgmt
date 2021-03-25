@@ -2,5 +2,8 @@
 pyyaml
 argh
 
+# Terminal utilities
+pexpect
+
 # Code changes
 watchdog

@@ -4,7 +4,7 @@ Class to login to the LeonhardMed cluster
 
 import subprocess
 import getpass
-from leotools.screen import ScreenHandler
+from leotools.terminal.screen import ScreenHandler
 
 
 class LeonhardMed:
