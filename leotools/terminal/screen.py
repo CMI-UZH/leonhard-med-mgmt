@@ -2,12 +2,15 @@
 Create and attach to screens
 """
 
+import time
 import re
 from uuid import uuid4
 from typing import List, Tuple
 import pexpect
 
 from leotools.terminal.shell import Shell
+
+wait_period = 0.1
 
 
 class Screen:
@@ -17,30 +20,40 @@ class Screen:
         pass
 
     @classmethod
-    def create(cls, name: str = None, unique: bool = True) -> str:
+    def create(cls, name: str = None, unique: bool = True, terminal: pexpect.spawn = None) -> str:
         """Create new detached screen, and duplicate"""
 
+        terminal_passed_in = (terminal is not None)
+        terminal = Shell() if terminal is None else terminal
         name = name if name is not None else str(uuid4().hex)[0:4]
 
-        screen_list = cls.list(name)
+        screen_list = cls.list(name=name, terminal=terminal)
         if unique and len(screen_list):
             name = f"{name}_{str(uuid4().hex[0:4])}"
 
-        cmd = f"screen -d -m -S {name}".encode('utf-8')
-        shell = Shell()
-        _, _ = shell.communicate(input=cmd)
-        shell.terminate()
+        terminal.sendline(f"screen -dmS {name}")
+        time.sleep(wait_period)
+
+        if not terminal_passed_in:
+            terminal.close(force=True)
 
         return name
 
     @staticmethod
-    def quit(name: str) -> None:
+    def quit(name: str, terminal: pexpect.spawn = None) -> None:
         """Kill a screen with the given name or identifier"""
 
-        cmd = f"screen -XS {name} quit".encode('utf-8')
-        shell = Shell()
-        _, _ = shell.communicate(input=cmd)
-        shell.terminate()
+        terminal_passed_in = (terminal is not None)
+        terminal = Shell() if terminal is None else terminal
+        if terminal is None:
+            terminal = Shell()
+
+        cmd = f"screen -XS {name} quit"
+        terminal.sendline(cmd)
+        time.sleep(wait_period)
+
+        if not terminal_passed_in:
+            terminal.close(force=True)
 
     @classmethod
     def quit_all(cls, name: str = None, exact_name_match: bool = True) -> None:
@@ -51,28 +64,33 @@ class Screen:
             cls.quit(name=screen[0])
 
     @staticmethod
-    def list(name: str = None, exact_name_match: bool = False) -> List[Tuple[str, str, bool]]:
+    def list(name: str = None, exact_name_match: bool = False, terminal: pexpect.spawn = None) \
+            -> List[Tuple[str, str, bool]]:
         """Retrieve a list with the screen IDs associated with a given screen name, if None, retrieve all screen IDs"""
 
-        screens = []
-        terminal = pexpect.spawn('screen -ls')
-        screen_list = terminal.read().decode()
-        terminal.close()
+        cmd = "screen -ls" if name is None else f"screen -ls {name}"
+
+        if terminal is None:
+            terminal = pexpect.spawn(cmd)
+            screen_list = terminal.read().decode()
+            terminal.close()
+        else:
+            terminal.sendline(cmd)
+            # BUG: Somehow screen -ls doesn't trigger a EOF for matching, and only matches the TIMEOUT
+            #  the before property stored ALL shell output, not just the output of the screen
+            #  Down-side, it takes long to match the timeout
+            terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=wait_period)
+            screen_list = terminal.before.decode()
 
         screen_pattern = re.compile(r"([0-9]{4,6})\.(\w+)\s+(\(Detached\)|\(Attached\))", re.MULTILINE)
         matched_screens = screen_pattern.findall(screen_list)
 
         # Select the screens to return
+        screens = []
         for screen_id, screen_name, attach_status in matched_screens:
-
-            add_screen = False
-            if name is None:
-                add_screen = True
-            else:
-                if exact_name_match and screen_name == name:
-                    add_screen = True
-                if not exact_name_match and name in screen_name:
-                    add_screen = True
+            add_screen = True
+            if exact_name_match and not screen_name == name:
+                add_screen = False
 
             if add_screen:
                 screen = (screen_id, screen_name, True if attach_status == "(Detached)" else False)

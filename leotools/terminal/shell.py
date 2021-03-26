@@ -1,19 +1,10 @@
 """
-Create and attach to screens
+Create a shell terminal using pexpect
 """
 
-import subprocess
+import pexpect
 
 
-class Shell(subprocess.Popen):
-    """
-    Child class of Popen, implementing a simple bash shell
-    """
-
+class Shell(pexpect.spawn):
     def __init__(self):
-        super().__init__('/bin/bash',
-                         stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                         shell=True
-                         )
+        super().__init__('sh')

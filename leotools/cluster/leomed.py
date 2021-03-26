@@ -21,8 +21,7 @@ class LeonhardMed(Cluster):
         """Login to the LeonhardMed cluster"""
 
         # Create a screen
-        screen_name = Screen().create(name=self.id)
-        print(screen_name)
+        screen_name = Screen.create(name=self.id)
 
         # Attach to screen and launch SSH
         terminal = pexpect.spawn(f"screen -r {screen_name}")
@@ -31,8 +30,8 @@ class LeonhardMed(Cluster):
         # Login procedure
         verification_code_success = False
         password_success = False
-        # BUG: Not matching welcome when logging in directly
-        response = terminal.expect_exact(['Verification code', 'Welcome'])
+        # BUG: Not matching welcome when logging in directly (not happening always)
+        response = terminal.expect_exact(['Verification code', 'Welcome', pexpect.EOF, pexpect.TIMEOUT])
         login_success = (response == 1)
 
         if not login_success:
@@ -62,7 +61,7 @@ class LeonhardMed(Cluster):
         # If error in connection, kill screen and print error
         if not login_success and (not verification_code_success or not password_success):
             time.sleep(1)
-            Screen().quit(screen_name)
+            Screen.quit(screen_name)
             if not verification_code_success:
                 item = "verification code"
             else:
@@ -74,3 +73,27 @@ class LeonhardMed(Cluster):
             print(f"Connected to LeonhardMed on screen: {screen_name}")
 
         return screen_name
+
+    def batch(self, screen_name: str, cpu: int = 10, memory: int = 10000, gpu: int = 0,
+              gpu_model: str = 'GeForceGTX1080Ti') -> str:
+
+        """Launch a batch job on LeoMed, with certain specifics"""
+        if gpu == 0:
+            cmd = f'bsub -Is -W 24:00 -n {cpu} -R "rusage[mem={memory}]" bash'
+        else:
+            cmd = f'bsub -Is -W 24:00 -n {cpu} -R "rusage[mem={memory},ngpus_excl_p=1]" -R "select[gpu_model0==' \
+                  f'{gpu_model}]" bash'
+
+        # Login to leomed
+        leomed_screen = self.login()
+
+        # Attach to the screen and launch the batch job
+        terminal = pexpect.spawn(f"screen -r {leomed_screen}")
+
+        # Retrieve the screen list
+        screen_list = Screen.list(name=screen_name, terminal=terminal)
+
+        terminal.sendline(f"ssh {self.ssh_address}")
+
+
+        return 'cia'
