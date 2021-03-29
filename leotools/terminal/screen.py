@@ -97,3 +97,16 @@ class Screen:
                 screens.append(screen)
 
         return screens
+
+    @staticmethod
+    def detach(terminal: pexpect.spawn, level: int = 1) -> None:
+        """Implements the screen detach procedure for a terminal"""
+
+        terminal.sendcontrol('a')
+        # For nested screen, multiple Ctrl-a signals plus a final a keystroke must be send in order to detach correctly
+        for _ in range(2, level):
+            terminal.sendcontrol('a')
+        if level > 1:
+            terminal.send('a')
+        terminal.sendcontrol('d')
+        time.sleep(wait_period)

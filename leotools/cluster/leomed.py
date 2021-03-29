@@ -3,7 +3,6 @@ Implement the LeonhardMed cluster adapter
 """
 
 import re
-import time
 import getpass
 import pexpect
 
@@ -23,7 +22,7 @@ class LeonhardMed(Cluster):
                          ssh_alias=ssh_alias)
         # TODO: Add binding of connection (for Jupyter batch scripts)
 
-    def setup(self, port: int) -> None:
+    def setup(self) -> None:
         """Setup procedure, responsible for adding the configuration options to connect to LeoMed in the SSH config
         file"""
 
@@ -33,26 +32,25 @@ class LeonhardMed(Cluster):
         leomed_key = "leomed" if leomed_key == "" else leomed_key
         sciencecloud_key = input("ScienceCloud SSH key file (Press Enter for default: sciencecloud): ")
         sciencecloud_key = "sciencecloud" if sciencecloud_key == "" else sciencecloud_key
+        port = int(input(f"Port to use to attach to {self.name}: "))
 
         # Configure the SSH hosts
         config_host(ssh_alias=self.ssh_alias, host_name=self.host_address, user=user, ssh_key=leomed_key,
                     proxy_host_name="jump.leomed.ethz.ch")
         config_host(ssh_alias="medinfmk_home", host_name=self.host_address, user=user, ssh_key=leomed_key,
-                    proxy_jump="leomed_jump", forward_port=8100)
+                    proxy_jump="leomed_jump", forward_port=port)
         config_host(ssh_alias="leomed_jump", host_name="jump.leomed.ethz.ch", user=user, proxy_jump="sciencecloud_jump",
-                    forward_port=8100)
+                    forward_port=port)
         config_host(ssh_alias="sciencecloud_jump", host_name="172.23.2.77", user=user, ssh_key=sciencecloud_key,
-                    forward_port=8100)
+                    forward_port=port)
 
         print(f"ssh-config: setup of {self.name} completed.")
 
     def login(self) -> str:
         """Login to the LeonhardMed cluster"""
 
-        # Create a screen
+        # Create and attach to a screen
         screen_name = Screen.create(name=self.id)
-
-        # Attach to screen and launch SSH
         terminal = pexpect.spawn(f"screen -r {screen_name}")
         terminal.sendline(f"ssh {self.host_address}")
 
@@ -89,12 +87,13 @@ class LeonhardMed(Cluster):
 
         # If error in connection, kill screen and print error
         if (not login_success and (not verification_code_success or not password_success)) or connection_timeout:
-            Screen.quit(screen_name)
 
+            Screen.quit(screen_name)
+            msg = ""
             if connection_timeout:
                 msg = f"Connection to {self.name} at {self.host_address} timed out."
             elif not verification_code_success:
-                msg= "Incorrect verification code entered 3 times. Connection not established."
+                msg = "Incorrect verification code entered 3 times. Connection not established."
             elif not password_success:
                 msg = "Incorrect password entered 3 times. Connection not established."
             raise ConnectionRefusedError(msg)
@@ -132,13 +131,17 @@ class LeonhardMed(Cluster):
         machine_pattern = re.compile(r"<<Starting on ([-\w]+)>>", re.MULTILINE)
         job = job_pattern.findall(batch_output)
         machine = machine_pattern.findall(batch_output)
-        print(f"Batch job nr. '{job[0]}' launched on machine '{machine[0]}'")
 
-        # Detach from the batch and Leomed screen
-        # BUG: Not detaching from the batch screen
-        Screen.detach(terminal)
+        # Detach from the batch screen
+        Screen.detach(terminal, level=2)
+        if len(job) == 1:
+            print(f"Batch job nr. '{job[0]}' launched on machine '{machine[0]}'")
+        else:
+            print(f"Could not start the batch job on {self.name}")
+            Screen.quit(batch_screen, terminal)
+
+        # Detach from the Leomed screen
         Screen.detach(terminal)
         terminal.close()
-        time.sleep(wait_period)
 
         return batch_screen

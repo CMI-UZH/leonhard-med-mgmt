@@ -14,11 +14,16 @@ class Cluster(ABC):
         self.ssh_alias = ssh_alias
 
     @abstractmethod
-    def setup(self, port: int) -> None:
+    def setup(self) -> None:
         """Setup SSH connection to cluster using specified port"""
         pass
 
     @abstractmethod
     def login(self) -> str:
         """Login to the cluster"""
+        pass
+
+    @abstractmethod
+    def batch(self, *args, **kwargs):
+        """Start a batch job on the cluster"""
         pass
