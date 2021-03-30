@@ -5,6 +5,7 @@ Implement the LeonhardMed cluster adapter
 import re
 import getpass
 import pexpect
+from typing import List
 
 from leotools.terminal.screen import Screen
 from leotools.terminal.ssh import config_host
@@ -46,13 +47,15 @@ class LeonhardMed(Cluster):
 
         print(f"ssh-config: setup of {self.name} completed.")
 
-    def login(self) -> str:
+    def login(self, ssh_alias: str = None) -> str:
         """Login to the LeonhardMed cluster"""
+
+        ssh_alias = "medinfmk" if ssh_alias is None else ssh_alias
 
         # Create and attach to a screen
         screen_name = Screen.create(name=self.id)
         terminal = pexpect.spawn(f"screen -r {screen_name}")
-        terminal.sendline(f"ssh {self.host_address}")
+        terminal.sendline(f"ssh {ssh_alias}")
 
         # Login procedure
         verification_code_success = False
@@ -91,7 +94,7 @@ class LeonhardMed(Cluster):
             Screen.quit(screen_name)
             msg = ""
             if connection_timeout:
-                msg = f"Connection to {self.name} at {self.host_address} timed out."
+                msg = f"Connection to {self.name} at {ssh_alias} timed out."
             elif not verification_code_success:
                 msg = "Incorrect verification code entered 3 times. Connection not established."
             elif not password_success:
@@ -102,7 +105,7 @@ class LeonhardMed(Cluster):
 
         return screen_name
 
-    def batch(self, leomed_screen: str, batch_screen: str, cpu: int = 10, memory: int = 10000, gpu: int = 0,
+    def batch(self, screens: List[str], duration: int = 24, cpu: int = 10, memory: int = 10000, gpu: int = 0,
               gpu_model: str = 'GeForceGTX1080Ti') -> str:
         """
         Launch a batch job on LeoMed, with certain specifics
@@ -110,14 +113,14 @@ class LeonhardMed(Cluster):
         """
 
         if gpu == 0:
-            cmd = f'bsub -Is -W 24:00 -n {cpu} -R "rusage[mem={memory}]" bash'
+            cmd = f'bsub -Is -W {duration}:00 -n {cpu} -R "rusage[mem={memory}]" bash'
         else:
-            cmd = f'bsub -Is -W 24:00 -n {cpu} -R "rusage[mem={memory},ngpus_excl_p=1]" -R "select[gpu_model0==' \
-                  f'{gpu_model}]" bash'
+            cmd = f'bsub -Is -W {duration}:00 -n {cpu} -R "rusage[mem={memory},ngpus_excl_p=1]" '\
+                  f'-R "select[gpu_model0=={gpu_model}]" bash'
 
         # Attach to the LeoMed screen and create a screen where to launch the batch process
-        terminal = pexpect.spawn(f"screen -r {leomed_screen}")
-        batch_screen = Screen.create(name=batch_screen, terminal=terminal)
+        terminal = Screen.attach_nested(screens=screens[:-1])
+        batch_screen = Screen.create(name=screens[-1], terminal=terminal)
         terminal.sendline(f"screen -r {batch_screen}")
         terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=wait_period)
 

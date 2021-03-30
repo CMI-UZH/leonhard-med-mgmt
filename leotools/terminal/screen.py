@@ -5,10 +5,11 @@ Create and attach to screens
 import time
 import re
 from uuid import uuid4
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import pexpect
 
 from leotools.terminal.shell import Shell
+from leotools.utils.validation import format_input_to_list
 
 wait_period = 0.1
 
@@ -99,6 +100,25 @@ class Screen:
         return screens
 
     @staticmethod
+    def attach(screen: str, terminal: pexpect.spawn = None) -> pexpect.spawn:
+        """Attach to a screen"""
+
+        terminal = Shell() if terminal is None else terminal
+        terminal.sendline(f"screen -r {screen}")
+
+        return terminal
+
+    @classmethod
+    def attach_nested(cls, screens: Union[str, List[str]], terminal: pexpect.spawn = None) -> pexpect.spawn:
+        """Attach to a nested sequence of screens"""
+
+        screens = format_input_to_list(screens)
+        for screen in screens:
+            terminal = cls.attach(screen, terminal)
+
+        return terminal
+
+    @staticmethod
     def detach(terminal: pexpect.spawn, level: int = 1) -> None:
         """Implements the screen detach procedure for a terminal"""
 
@@ -110,3 +130,15 @@ class Screen:
             terminal.send('a')
         terminal.sendcontrol('d')
         time.sleep(wait_period)
+
+    @classmethod
+    def detach_nested(cls, terminal: pexpect.spawn, depth: int = 1, terminate: bool = False) -> None:
+        """Detach from a nested sequence of screens"""
+
+        level = depth
+        while level > 0:
+            cls.detach(terminal=terminal, level=level)
+            level -= 1
+
+        if terminate:
+            terminal.close(force=True)
