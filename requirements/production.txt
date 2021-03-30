@@ -1,9 +1,5 @@
-# Utilities
-pyyaml
-argh
-
 # Terminal utilities
 pexpect
 
 # Code changes
-watchdog
+code-sync
