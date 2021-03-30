@@ -3,7 +3,7 @@
 # Upper level cluster definition
 cluster:
   id: leonhardmed                   # Identifies the class to be used for login and other procedures
-  setup: True                       # Define if the setup of the cluster is necessary
+  setup: False                      # Define if the setup of the cluster is necessary
   host: medinfmk                    # Name of ssh host to use to connect to
   batch_jobs:                       # List of batch jobs that can be launched in parallel
     - name                          # Name identifying the batch job to run, listed here in the correct order
@@ -11,26 +11,25 @@ cluster:
 # Batch jobs definition
 batch_jobs:
   name:                           # Some identifier for the batch job - used to name the screen where this is launched
-    id: someidentifier            # Name to be used for the screen to identify it (defaults to the batch_job name)
+    id: notebook                  # Name to be used for the screen to identify it (defaults to the batch_job name)
     duration: 24                  # Duration of the batch job in hours
     cpu: 4                        # Number of CPU cores requested
     memory: 10                    # Memory required per core in MB
-    gpu: 1                        # Number of GPUs attached to batch job
+    gpu: 0                        # Number of GPUs attached to batch job
     gpu_model: GeForceGTX1080Ti   # GPU model used
-    env:                          # Environment variables that need to be available in the batch job
-      - VARNAME:VALUE
+    env:                          # Environment variables that need to be available in the batch job (works with $vars)
+      - PYTHONPATH=$PYTHONPATH:/cluster/home/mberchier/custom_packages/lib/python3.8/site-packages
     run:                          # Series of commands to run in the batch screen
-      - cd .                      # Actual shell command to run in the batch screen
       - SINGULARITY               # Run the singularity command (special flag)
       - cd /opt/data              # Actual shell command to run in the batch screen
       - JUPYTER                   # Run the jupyter command (special flag)
     singularity:
       image: ~/singularity_images/schupbach.img                   # Image to use
       home: $HOME                                                 # Home binding
-      bind:
+      binding:
         - /cluster/dataset/medinfmk/IFI_JB_001_OSMICI:/opt/data   # Directories binding
     jupyter:
-      port: 8101                                                  # Binding port
+      port: 8101                                                  # T Binding port
 
 codesync:
   cluster: leonhardmed

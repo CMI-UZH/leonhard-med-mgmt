@@ -3,8 +3,9 @@ Interface for clusters login
 """
 
 import re
+import time
 from abc import ABC, abstractmethod
-from typing import Union, List, Tuple
+from typing import Union, List
 
 import pexpect
 
@@ -26,7 +27,7 @@ class Cluster(ABC):
         pass
 
     @abstractmethod
-    def login(self, ssh_alias: str = None) -> str:
+    def login(self, ssh_alias: str = None, binding: str = None) -> str:
         """Login to the cluster"""
         pass
 
@@ -36,8 +37,10 @@ class Cluster(ABC):
         pass
 
     @staticmethod
-    def run(screens: List[str], commands: List[str]) -> None:
+    def run(screens: List[str], commands: Union[str, List[str]]) -> None:
         """Run a list of commands inside nested screens (listed from outward to inward)"""
+
+        commands = format_input_to_list(commands)
 
         terminal = Screen.attach_nested(screens=screens)
         for cmd in commands:
@@ -63,30 +66,44 @@ class Cluster(ABC):
             cmd += f"-B {','.join(binding)} "
         cmd += f"{image}"
 
-        print(f"Launching singularity image on {self.name} in screen '{screens[:-1]}'...")
         terminal.sendline(cmd)
         terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=2)
+        print(f"Launched singularity image on {self.name} in screen '{screens[-1]}'")
 
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
-    def jupyter(self, screens: List[str], port: int) -> Tuple[str, str, str, str]:
+    def jupyter(self, screens: List[str], port: int) -> str:
         """Launch a Jupyter notebook inside nested screens (listed from outward to inward)"""
 
         terminal = Screen.attach_nested(screens=screens)
 
         # Launch the jupyter notebook
-        print(f"Launching jupyter notebook on {self.name} in screen '{screens[:-1]}'...")
+        print(f"Launching jupyter notebook on {self.name} in screen '{screens[-1]}'...")
         cmd = f"jupyter notebook --no-browser --ip=$(hostname -i) --port {port}"
         terminal.sendline(cmd)
+        # BUG: jupyter notebook doesn't start when called from pexpect-created screens, even when trying to
+        #  start a notebook by manually attaching to the screen command. Might have to do with iPython and the fact
+        #  that it uses pexpect itself.
+        #  Error: expect matches timeout and doesn't find any output in the before property, thus throwing an error
+        #  in the regular expression matching
         terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=5)
         jupyter_output = terminal.before.decode()
+        Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
         # Retrieve the IP address and port for port forwarding
         notebook_url = re.compile(r"\[I [0-9:\.]{12} \w+\] (https?):\/\/([\w\.]+):([0-9]{2,5})\/\?token=(\w{16,64})",
                                   re.MULTILINE)
         protocol, address, port, token = notebook_url.search(jupyter_output)[0]
+        url_remote = f"{protocol}://{address}:{port}?token={token}"
+        url_local = f"{protocol}://localhost:{port}?token={token}"
+        binding = f"{port}:{address}:{port}"
 
-        Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
-        print(f"Jupyter notebook launched at: {protocol}://{address}:{port}?token={token}")
+        print(f"Jupyter notebook launched at: {url_remote}")
+        print(f"... access it on your local machine at: {url_local}")
 
-        return protocol, address, port, token
+        # Open in your default browser
+        terminal = pexpect.spawn(f"open {url_local}")
+        time.sleep(0.2)
+        terminal.close(force=True)
+
+        return binding

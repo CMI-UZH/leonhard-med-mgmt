@@ -21,7 +21,6 @@ class LeonhardMed(Cluster):
                          name="LeonhardMed",
                          host_address="login.medinfmk.leonhard.ethz.ch",
                          ssh_alias=ssh_alias)
-        # TODO: Add binding of connection (for Jupyter batch scripts)
 
     def setup(self) -> None:
         """Setup procedure, responsible for adding the configuration options to connect to LeoMed in the SSH config
@@ -47,7 +46,7 @@ class LeonhardMed(Cluster):
 
         print(f"ssh-config: setup of {self.name} completed.")
 
-    def login(self, ssh_alias: str = None) -> str:
+    def login(self, ssh_alias: str = None, binding: str = None) -> str:
         """Login to the LeonhardMed cluster"""
 
         ssh_alias = "medinfmk" if ssh_alias is None else ssh_alias
@@ -55,7 +54,10 @@ class LeonhardMed(Cluster):
         # Create and attach to a screen
         screen_name = Screen.create(name=self.id)
         terminal = pexpect.spawn(f"screen -r {screen_name}")
-        terminal.sendline(f"ssh {ssh_alias}")
+        cmd = f"ssh {ssh_alias}"
+        if binding is not None:
+            cmd += f" -L {binding}"
+        terminal.sendline(cmd)
 
         # Login procedure
         verification_code_success = False
@@ -138,9 +140,9 @@ class LeonhardMed(Cluster):
         # Detach from the batch screen
         Screen.detach(terminal, level=2)
         if len(job) == 1:
-            print(f"Batch job nr. '{job[0]}' launched on machine '{machine[0]}'")
+            print(f"... batch job nr. '{job[0]}' launched on machine '{machine[0]}'")
         else:
-            print(f"Could not start the batch job on {self.name}")
+            print(f"... could not start the batch job on {self.name}")
             Screen.quit(batch_screen, terminal)
 
         # Detach from the Leomed screen

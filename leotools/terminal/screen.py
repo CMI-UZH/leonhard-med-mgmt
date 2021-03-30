@@ -77,9 +77,10 @@ class Screen:
             terminal.close()
         else:
             terminal.sendline(cmd)
-            # BUG: Somehow screen -ls doesn't trigger a EOF for matching, and only matches the TIMEOUT
-            #  the before property stored ALL shell output, not just the output of the screen
-            #  Down-side, it takes long to match the timeout
+            # IMPROVE: Somehow screen -ls doesn't trigger a EOF for matching, and only matches the TIMEOUT. Current
+            #  workaround avoids an error, but is not technically correct. The downside of the current method is that
+            #  the execution needs to wait for the timeout in order to continue.
+            #  The before property stores ALL the shell output, not just the output of the screen.
             terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=wait_period)
             screen_list = terminal.before.decode()
 
