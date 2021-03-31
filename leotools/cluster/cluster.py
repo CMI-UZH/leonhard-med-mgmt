@@ -59,12 +59,12 @@ class Cluster(ABC):
             binding = format_input_to_list(binding)
 
         terminal = Screen.attach_nested(screens=screens)
-        cmd = f"singularity shell "
+        cmd = f"singularity shell"
         if home_dir is not None:
-            cmd += f"-H {home_dir} "
+            cmd += f" -H {home_dir}"
         if binding is not None:
-            cmd += f"-B {','.join(binding)} "
-        cmd += f"{image}"
+            cmd += f" -B {','.join(binding)}"
+        cmd += f" {image}"
 
         terminal.sendline(cmd)
         terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=2)

@@ -4,7 +4,7 @@
 cluster:
   id: leonhardmed                   # Identifies the class to be used for login and other procedures
   setup: False                      # Define if the setup of the cluster is necessary
-  host: medinfmk                    # Name of ssh host to use to connect to
+  host: medinfmk               # Name of ssh host to use to connect to
   batch_jobs:                       # List of batch jobs that can be launched in parallel
     - name                          # Name identifying the batch job to run, listed here in the correct order
 

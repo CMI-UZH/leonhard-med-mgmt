@@ -22,7 +22,7 @@ class Screen:
 
     @classmethod
     def create(cls, name: str = None, unique: bool = True, terminal: pexpect.spawn = None) -> str:
-        """Create new detached screen, and duplicate"""
+        """Create new detached screen and change the name if not unique"""
 
         terminal_passed_in = (terminal is not None)
         terminal = Shell() if terminal is None else terminal
@@ -42,7 +42,7 @@ class Screen:
 
     @staticmethod
     def quit(name: str, terminal: pexpect.spawn = None) -> None:
-        """Kill a screen with the given name or identifier"""
+        """Quit a screen with the given name or identifier"""
 
         terminal_passed_in = (terminal is not None)
         terminal = Shell() if terminal is None else terminal

@@ -62,7 +62,7 @@ class LeonhardMed(Cluster):
         # Login procedure
         verification_code_success = False
         password_success = False
-        response = terminal.expect_exact(['Verification code', 'Welcome', pexpect.EOF, pexpect.TIMEOUT], timeout=4)
+        response = terminal.expect_exact(['Verification code', 'Welcome', pexpect.EOF, pexpect.TIMEOUT], timeout=10)
         login_success = (response == 1)
         connection_timeout = (response == 3)
 
