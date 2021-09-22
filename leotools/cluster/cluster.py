@@ -46,7 +46,8 @@ class Cluster(ABC):
         for cmd in commands:
             terminal.sendline(cmd)
             terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=1)
-
+            terminal_output = terminal.before.decode()
+            print(terminal_output)
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
         return None
@@ -88,12 +89,13 @@ class Cluster(ABC):
         #  in the regular expression matching
         terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=5)
         jupyter_output = terminal.before.decode()
+        print(jupyter_output)
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
         # Retrieve the IP address and port for port forwarding
-        notebook_url = re.compile(r"\[I [0-9:\.]{12} \w+\] (https?):\/\/([\w\.]+):([0-9]{2,5})\/\?token=(\w{16,64})",
-                                  re.MULTILINE)
-        protocol, address, port, token = notebook_url.search(jupyter_output)[0]
+        notebook_url = re.compile(r"(http?):\/\/([\w\.]+):([0-9]{2,5})\/\?token=(\w{16,64})", re.MULTILINE)
+        protocol, address, port, token = notebook_url.findall(jupyter_output)[0]
+        print(f"protocol: {protocol}, address: {address}, port: {port}, token: {token}")
         url_remote = f"{protocol}://{address}:{port}?token={token}"
         url_local = f"{protocol}://localhost:{port}?token={token}"
         binding = f"{port}:{address}:{port}"
