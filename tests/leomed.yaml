@@ -12,17 +12,19 @@ cluster:
 batch_jobs:
   name:                           # Some identifier for the batch job - used to name the screen where this is launched
     id: notebook                  # Name to be used for the screen to identify it (defaults to the batch_job name)
-    duration: 24                  # Duration of the batch job in hours
-    cpu: 4                        # Number of CPU cores requested
-    memory: 10                    # Memory required per core in MB
+    duration: 1                  # Duration of the batch job in hours
+    cpu: 1                        # Number of CPU cores requested
+    memory: 1000                  # Memory required per core in MB
     gpu: 0                        # Number of GPUs attached to batch job
     gpu_model: GeForceGTX1080Ti   # GPU model used
     env:                          # Environment variables that need to be available in the batch job (works with $vars)
-      - PYTHONPATH=$PYTHONPATH:/cluster/home/mberchier/custom_packages/lib/python3.8/site-packages
+      #- PYTHONPATH=$PYTHONPATH:/cluster/home/mberchier/custom_packages/lib/python3.8/site-packages
+      - LD_LIBRARY_PATH=/cluster/apps/lsf/10.1/linux3.10-glibc2.17-x86_64/lib:/cluster/apps/lsf/10.1/linux3.10-glibc2.17-x86_64/lib:/cluster/apps/gcc-6.3.0/nccl-2.4.8-1-2tfa3dfv7h4nq45vphxcout4mbo3m5ju/lib:/cluster/apps/gcc-6.3.0/libpng-1.6.27-7vevbsio2diw5xquq7oxg7fphkppf2kx/lib:/cluster/apps/gcc-6.3.0/jpeg-9b-742nyforj7mfuhcfzbsbqjlmiya2wi5e/lib:/cluster/apps/gcc-6.3.0/cudnn-7.6.4-45t3bf3foruki6ijeylccnqwph5zdbe2/lib64:/cluster/apps/gcc-6.3.0/cuda-10.1.243-n6qg6z5js3zfnhp2cfg5yjccej636czm/extras/CUPTI/lib64:/cluster/apps/gcc-6.3.0/cuda-10.1.243-n6qg6z5js3zfnhp2cfg5yjccej636czm/lib64:/cluster/apps/gcc-6.3.0/openblas-0.2.19-jusdys62qhv52qjbsoewvthriekuaynw/lib:/cluster/apps/python/3.8.5_gpu_gcc630/x86_64/lib64/python3.7/site-packages/torch/lib:/cluster/apps/python/3.8.5_gpu_gcc630/x86_64/lib64:/cluster/spack/apps/linux-centos7-x86_64/gcc-4.8.5/gcc-6.3.0-d7fey5ouwb3cw26w5zqafqcse7q3fs6d/lib64:/cluster/spack/apps/linux-centos7-x86_64/gcc-4.8.5/gcc-6.3.0-d7fey5ouwb3cw26w5zqafqcse7q3fs6d/lib
     run:                          # Series of commands to run in the batch screen
-      - SINGULARITY               # Run the singularity command (special flag)
-      - cd /opt/data              # Actual shell command to run in the batch screen
-      - JUPYTER                   # Run the jupyter command (special flag)
+      # - SINGULARITY               # Run the singularity command (special flag)
+      - cd /cluster/home/frliem/batchtest
+      - which jupyter
+      - JUPYTER
     singularity:
       image: ~/singularity_images/schupbach.img                   # Image to use
       home: $HOME                                                 # Home binding
