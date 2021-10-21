@@ -21,7 +21,6 @@ cluster_screen = cluster.login(ssh_alias=alias)
 # Execute batch jobs
 for batch_job in batch_jobs:
     # Open the screen
-    cluster.run(screens=[cluster_screen], commands=["module load  gcc/6.3.0 python_gpu/3.8.5", "module list"])
     batch_screen = cluster.batch(screens=[cluster_screen, configs.batch_job_screen(batch_job)],
                                  **configs.batch_job_specs(batch_job))
     screens = [cluster_screen, batch_screen]
