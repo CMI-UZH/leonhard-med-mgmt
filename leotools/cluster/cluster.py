@@ -68,7 +68,7 @@ class Cluster(ABC):
         cmd += f" {image}"
 
         terminal.sendline(cmd)
-        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=2)
+        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=10)
         print(f"Launched singularity image on {self.name} in screen '{screens[-1]}'")
 
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)

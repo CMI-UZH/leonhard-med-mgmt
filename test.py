@@ -32,6 +32,7 @@ for batch_job in batch_jobs:
 
     # Run commands list
     for cmd in configs.batch_job_commands(batch_job):
+        print("cmd: ", cmd)
         if cmd == 'SINGULARITY':
             cluster.singularity(screens=screens, **configs.singularity(batch_job))
         elif cmd == 'JUPYTER':
