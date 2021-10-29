@@ -1,5 +1,9 @@
 # Terminal utilities
 pexpect
 
+# Document validation
+pyyaml
+cerberus
+
 # Code changes
 code-sync

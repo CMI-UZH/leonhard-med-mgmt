@@ -1,11 +1,11 @@
 """
-Interface for clusters login
+@author: matteobe
 """
 
 import re
 import time
 from abc import ABC, abstractmethod
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import pexpect
 
@@ -14,12 +14,16 @@ from leotools.utils.validation import format_input_to_list
 
 
 class Cluster(ABC):
+    """
+    Interface definition for a computing cluster, which includes the definition of the cluster identifier,
+    the host address and the SSH alias used to access the cluster
+    """
 
     def __init__(self, cluster_id: str, name: str, host_address: str, ssh_alias: str = None):
-        self.id = cluster_id
-        self.name = name
-        self.host_address = host_address
-        self.ssh_alias = ssh_alias
+        self._id = cluster_id
+        self._name = name
+        self._host_address = host_address
+        self._ssh_alias = ssh_alias
 
     @abstractmethod
     def setup(self) -> None:
@@ -46,66 +50,52 @@ class Cluster(ABC):
         for cmd in commands:
             terminal.sendline(cmd)
             terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=1)
-            terminal_output = terminal.before.decode()
-            print(terminal_output)
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
         return None
 
-    def singularity(self, screens: List[str], image: str, home_dir: str = None,
-                    binding: Union[str, List[str]] = None) -> None:
+    def launch_singularity(self, screens: List[str], image: str, home_dir: str = None,
+                           bindings: Union[str, List[str]] = None, gpu: bool = False) -> None:
         """Launch a singularity image inside a screen"""
-
-        if binding is not None:
-            binding = format_input_to_list(binding)
 
         terminal = Screen.attach_nested(screens=screens)
         cmd = f"singularity shell"
+        if gpu is not False:
+            cmd += " --nv"
         if home_dir is not None:
-            cmd += f" -H {home_dir}"
-        if binding is not None:
-            cmd += f" -B {','.join(binding)}"
+            cmd += f' -H {home_dir}'
+        if bindings is not None:
+            bindings = format_input_to_list(bindings)
+            cmd += f" -B {','.join(bindings)}"
         cmd += f" {image}"
 
         terminal.sendline(cmd)
         terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=10)
-        print(f"Launched singularity image on {self.name} in screen '{screens[-1]}'")
+        print(f"Launched singularity image on {self._name} in screen '{screens[-1]}'")
 
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
-    def jupyter(self, screens: List[str], port: int) -> str:
+    def launch_jupyter(self, screens: List[str], port: int) -> Tuple[str, str]:
         """Launch a Jupyter notebook inside nested screens (listed from outward to inward)"""
 
         terminal = Screen.attach_nested(screens=screens)
 
         # Launch the jupyter notebook
-        print(f"Launching jupyter notebook on {self.name} in screen '{screens[-1]}'...")
+        print(f"Launching jupyter notebook on {self._name} in screen '{screens[-1]}'...")
         cmd = f"jupyter notebook --no-browser --ip=$(hostname -i) --port {port}"
         terminal.sendline(cmd)
-        # BUG: jupyter notebook doesn't start when called from pexpect-created screens, even when trying to
-        #  start a notebook by manually attaching to the screen command. Might have to do with iPython and the fact
-        #  that it uses pexpect itself.
-        #  Error: expect matches timeout and doesn't find any output in the before property, thus throwing an error
-        #  in the regular expression matching
-        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=5)
+        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=15)
         jupyter_output = terminal.before.decode()
-        print(jupyter_output)
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
         # Retrieve the IP address and port for port forwarding
         notebook_url = re.compile(r"(http?):\/\/([\w\.]+):([0-9]{2,5})\/\?token=(\w{16,64})", re.MULTILINE)
         protocol, address, port, token = notebook_url.findall(jupyter_output)[0]
-        print(f"protocol: {protocol}, address: {address}, port: {port}, token: {token}")
-        url_remote = f"{protocol}://{address}:{port}?token={token}"
-        url_local = f"{protocol}://localhost:{port}?token={token}"
+        url_remote = f"{protocol}://{address}:{port}/?token={token}"
+        url_local = f"{protocol}://127.0.0.1:{port}/?token={token}"
         binding = f"{port}:{address}:{port}"
 
         print(f"Jupyter notebook launched at: {url_remote}")
         print(f"... access it on your local machine at: {url_local}")
 
-        # Open in your default browser
-        terminal = pexpect.spawn(f"open {url_local}")
-        time.sleep(0.2)
-        terminal.close(force=True)
-
-        return binding
+        return url_local, binding

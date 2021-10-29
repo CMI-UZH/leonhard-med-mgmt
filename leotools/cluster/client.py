@@ -1,21 +1,86 @@
 """
-Implements a clients dispatcher based on the cluster name
+@author: matteobe
 """
 
-from leotools.cluster.cluster import Cluster
-from leotools.cluster.leomed import LeonhardMed
+import time
+from typing import Dict
+import importlib
 
-cluster_mapping = {
-    'leonhardmed': LeonhardMed(),
-    'leomed': LeonhardMed(),
-}
+import pexpect
+
+from leotools.configs.parser import ConfigsParser
 
 
-def get_cluster_client(cluster: str) -> Cluster:
-    """Return the correct cluster"""
+class ClusterClient:
+    """
+    Implements a cluster client manager responsible for executing all the steps defined in the configuration YAML
+    file.
+    """
 
-    if cluster not in cluster_mapping.keys():
-        raise ValueError(f"Invalid cluster name passed in.\n"
-                         f"Valid cluster names: {','.join(list(cluster_mapping.keys()))}")
+    clusters = {
+        'leonhardmed': 'LeonhardMed',
+        'leomed': 'LeonhardMed',
+    }
 
-    return cluster_mapping[cluster]
+    def __init__(self, configs: Dict):
+        self._configs = ConfigsParser(configs=configs)
+        self._cluster = None
+
+    def set_cluster(self, cluster: str) -> None:
+        """
+        Define the cluster object to be used for executing the commands
+        """
+        if cluster not in ClusterClient.clusters.keys():
+            raise ValueError(f"Invalid cluster name passed in.\n"
+                             f"Valid cluster names: {','.join(list(ClusterClient.clusters.keys()))}")
+
+        self._cluster = getattr(importlib.import_module(f"leotools.cluster"), ClusterClient.clusters[cluster])()
+
+    def start(self):
+        """
+        Start all the steps as defined in the configuration file
+        """
+
+        # Setup the cluster and the screens
+        name, alias, batch_jobs, setup = self._configs.get_cluster_config()
+        self.set_cluster(cluster=name)
+        if setup:
+            self._cluster.setup()
+        cluster_screen = self._cluster.login(ssh_alias=alias)
+
+        # Execute the batch batch jobs
+        for batch_job in batch_jobs:
+            batch_screen = self._cluster.batch(screens=[cluster_screen,
+                                                        self._configs.get_batch_job_screen_name(batch_job)],
+                                               **self._configs.get_batch_job_specs(batch_job))
+            screens = [cluster_screen, batch_screen]
+
+            # Load environment variables
+            env_vars = self._configs.get_batch_job_env(batch_job)
+            if env_vars is not None:
+                self._cluster.run(screens=screens, commands=env_vars)
+
+            # Run commands list
+            for cmd in self._configs.get_batch_job_commands(batch_job):
+                if cmd == 'SINGULARITY':
+                    self._cluster.launch_singularity(screens=screens,
+                                                     **self._configs.get_singularity_configs(batch_job))
+                elif cmd == 'JUPYTER':
+                    url_local, binding = self._cluster.launch_jupyter(screens=screens,
+                                                                      **self._configs.get_jupyter_configs(batch_job))
+                    self._cluster.login(ssh_alias=alias, binding=binding, name='tunnel')
+
+                    # Open the URL in the default browser
+                    terminal = pexpect.spawn(f"open {url_local}")
+                    time.sleep(0.2)
+                    terminal.close(force=True)
+                else:
+                    self._cluster.run(screens=screens, commands=cmd)
+
+    def stop(self):
+        """
+        Stop all the steps as they are defined in the configuration file
+        """
+        # Close all screens created during the process of launching the cluster
+        # TODO: Implement the procedure to close the screens
+        pass
