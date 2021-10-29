@@ -12,22 +12,22 @@ cluster:
 batch_jobs:
   name:                           # Some identifier for the batch job - used to name the screen where this is launched
     id: notebook                  # Name to be used for the screen to identify it (defaults to the batch_job name)
-    duration: 24                  # Duration of the batch job in hours
-    cpu: 4                        # Number of CPU cores requested
-    memory: 10                    # Memory required per core in MB
+    duration: 1                  # Duration of the batch job in hours
+    cpu: 1                        # Number of CPU cores requested
+    memory: 1000                  # Memory required per core in MB
     gpu: 0                        # Number of GPUs attached to batch job
     gpu_model: GeForceGTX1080Ti   # GPU model used
-    env:                          # Environment variables that need to be available in the batch job (works with $vars)
-      - PYTHONPATH=$PYTHONPATH:/cluster/home/mberchier/custom_packages/lib/python3.8/site-packages
+    # env:                          # Environment variables that need to be available in the batch job (works with $vars)
+    #   - PYTHONPATH=$PYTHONPATH:/cluster/home/mberchier/custom_packages/lib/python3.8/site-packages
     run:                          # Series of commands to run in the batch screen
       - SINGULARITY               # Run the singularity command (special flag)
       - cd /opt/data              # Actual shell command to run in the batch screen
       - JUPYTER                   # Run the jupyter command (special flag)
     singularity:
-      image: ~/singularity_images/schupbach.img                   # Image to use
+      image: /cluster/dataset/medinfmk/singularity_images/BatchJupyter.img                 # Image to use
       home: $HOME                                                 # Home binding
       binding:
-        - /cluster/dataset/medinfmk/IFI_JB_001_OSMICI:/opt/data   # Directories binding
+        - /cluster/dataset/medinfmk/batchtest:/opt/data   # Directories binding
     jupyter:
       port: 8101                                                  # T Binding port
 
