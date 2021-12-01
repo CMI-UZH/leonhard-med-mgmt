@@ -1,0 +1,21 @@
+# Virtual environment
+.venv
+
+# Testing
+tests/logs/
+.pytest_cache
+
+# Documentation
+docs/build/
+
+# Python packaging
+*.egg-info
+
+# Caching
+__pycache__
+
+# IDEs
+.idea
+
+# Local data
+local/

@@ -1,0 +1,75 @@
+# YAML configuration file schema
+cluster:
+  type: dict
+  schema:
+    id:
+      type: string
+      allowed:
+        - leonhardmed
+        - leomed
+    host:
+      type: string
+      required: False
+    setup:
+      type: boolean
+      default: False
+    batch_jobs:
+      type: list
+      schema:
+        type: string
+
+batch_jobs:
+  type: dict
+  valuesrules:
+    type: dict
+    schema:
+      id:
+        type: string
+      duration:
+        type: integer
+        default: 24
+      cpu:
+        type: integer
+        default: 1
+      memory:
+        type: integer
+        default: 10
+      gpu:
+        type: integer
+        required: False
+        default: 0
+      gpu_model:
+        type: string
+        required: False
+        default: GeForceGTX1080Ti
+      env:
+        type: list
+        required: False
+        schema:
+          type: string
+      run:
+        type: list
+        schema:
+          type: string
+      singularity:
+        type: dict
+        required: False
+        schema:
+          image:
+            type: string
+          home:
+            type: string
+            default: $HOME
+          bindings:
+            type: list
+            schema:
+              type: string
+          gpu:
+            type: boolean
+            default: False
+      jupyter:
+        type: dict
+        required: False
+        schema:
+          port:
+            type: integer

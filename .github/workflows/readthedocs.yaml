@@ -1,0 +1,32 @@
+# Build documentation of ReadTheDocs
+
+# TODO: Fix problem: gets triggered when rebasing dev from master
+name: Document on ReadTheDocs
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  document:
+    name: Documentation build on ReadTheDocs
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+
+      - name: Setup Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install required packages
+        run: python3 -m pip install --user --upgrade requests
+
+      - name: Trigger documentation build
+        run: |
+          python3 .github/workflows/readthedocs.py
+        env:
+          READTHEDOCS_TOKEN: ${{ secrets.readthedocs_token }}

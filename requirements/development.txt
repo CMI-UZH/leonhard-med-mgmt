@@ -1,0 +1,8 @@
+# -------------- Development requirements --------------- #
+# Production, testing and documentation packages
+-r production.txt
+-r testing.txt
+-r documentation.txt
+
+# Jupyter notebooks
+jupyter

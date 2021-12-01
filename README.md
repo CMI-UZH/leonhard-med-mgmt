@@ -1,17 +1,40 @@
+# Clusty - The Cluster Environment Launch Assistant
 
-## Installation
-* `git clone` the repo and `cd` into it.
-* Run `pip install -e .` to install the repo's python package.
-  * If you get a `g++` error during installation, this may be due to a OSX Mojave, see [this StackOverflow answer](https://stackoverflow.com/questions/52509602/cant-compile-c-program-on-a-mac-after-upgrade-to-mojave).
+The ``clusty`` package is meant to be used for quickly setting up of repetitive tasks performed on a cluster 
+environment, such as a high performance computing (HPC) environment in research, or even for cloud machines, 
+which require SSH authentication and repeated setup.
 
-## Utilities
+## Get started
 
-### Code Sync
-`leotools` automatically installs the `code-sync` package.
-See the [`code-sync` documentation](https://github.com/uzh-dqbm-cmi/code-sync) for more details on usage.
+To get started, a user can run the example by executing the following code in the root directory of this repository. 
 
-### `build_image`
+**Important** is that before executing the script, you ssh-add all the required identities.
 
-Add the custom packages path to your path in your `~/.bashrc`:
+```
+clusty start --config example.yaml
+```
 
-export PATH=$PATH:/cluster/home/lkink/custom_packages/bin/
+## Configure clusty
+
+The configuration for the 
+
+
+## Clusters
+
+Adding new default clusters to the package can be accomplished by adding a Cluster class in the cluster folder. We 
+would encourage users to fork the repository if they want to use different clusters, as this package only implements 
+cluster residing with the Swiss Federal Institute of Technology (ETH). 
+
+### Implemented cluster
+
+#### LeonhardMed @ ETH
+
+#### Euler @ ETH
+
+
+## Contributing
+
+New standard functions to be executed on a cluster are welcomed to be added to the configuration file, e.g. Docker, 
+Docker Compose, Kubernetes, Kedro, etc. unless they can be executed as a single line command.
+Please read the CONTRIBUTING.md file for code style guidelines and conventions. 
+

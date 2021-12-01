@@ -1,0 +1,37 @@
+# Check code style upon submission
+
+# TODO: Fix problem: gets triggered on pull request to staging from dev
+name: Lint code
+on:
+  push:
+    branches-ignore:
+      - staging
+      - readthedocs
+
+jobs:
+  lint:
+    name: Lint package code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+
+      - name: Setup Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install required packages
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade setuptools
+          python3 -m pip install --upgrade -r requirements/testing.txt
+
+      - name: Code style check
+        run: python3 -m flake8 --verbose --config=setup.cfg --exit-zero . 2>&1 | tee linting.log
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linting
+          path: linting.log

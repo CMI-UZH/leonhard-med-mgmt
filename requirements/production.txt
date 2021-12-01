@@ -1,0 +1,7 @@
+# -------------- Production requirements --------------- #
+# Terminal
+pexpect
+
+# Configurations
+pyyaml
+cerberus

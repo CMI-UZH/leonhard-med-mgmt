@@ -1,0 +1,9 @@
+# -------------- Testing requirements --------------- #
+# Production packages
+-r production.txt
+
+# Testing
+pytest>=6.1.2
+
+# Linting
+flake8>=3.8.4
