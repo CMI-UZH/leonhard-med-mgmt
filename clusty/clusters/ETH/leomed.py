@@ -1,5 +1,5 @@
 """
-@author: matteobe
+Author: @matteobe
 """
 
 import re
@@ -7,9 +7,9 @@ import getpass
 import pexpect
 from typing import List
 
-from leotools.terminal.screen import Screen
-from leotools.terminal.ssh import config_host
-from leotools.cluster.cluster import Cluster
+from clusty.terminal.screen import Screen
+from clusty.terminal.ssh import config_host
+from clusty.clusters.cluster import Cluster
 
 
 class LeonhardMed(Cluster):

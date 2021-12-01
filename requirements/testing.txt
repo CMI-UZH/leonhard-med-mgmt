@@ -1,10 +1,9 @@
-# -------------- Requirements for testing --------------- #
+# -------------- Testing requirements --------------- #
 # Production packages
 -r production.txt
 
 # Testing
 pytest>=6.1.2
-pytest-ordering>=0.6
 
-# Code stlye control
+# Linting
 flake8>=3.8.4

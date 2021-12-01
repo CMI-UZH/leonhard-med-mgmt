@@ -1,5 +1,5 @@
 """
-@author: matteobe
+Author: @matteobe
 """
 
 import re
@@ -8,8 +8,8 @@ from typing import Union, List, Tuple
 
 import pexpect
 
-from leotools.terminal.screen import Screen
-from leotools.utils.validation import format_input_to_list
+from clusty.terminal.screen import Screen
+from clusty.utils.validation import format_input_to_list
 
 
 class Cluster(ABC):

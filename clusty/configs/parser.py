@@ -1,5 +1,5 @@
 """
-@author: matteobe
+Author: @matteobe
 """
 
 from typing import Tuple, List
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from leotools.utils.validation import validate_schema, format_input_to_list
+from clusty.utils.validation import validate_schema, format_input_to_list
 
 
 class ConfigsParser:

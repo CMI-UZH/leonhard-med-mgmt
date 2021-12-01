@@ -1,9 +1,7 @@
-# Terminal utilities
+# -------------- Production requirements --------------- #
+# Terminal
 pexpect
 
-# Document validation
+# Configurations
 pyyaml
 cerberus
-
-# Code changes
-code-sync

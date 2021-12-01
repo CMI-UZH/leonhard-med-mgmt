@@ -2,20 +2,20 @@ from os import path
 from setuptools import setup
 
 # Project
-NAME = 'leotools'
+NAME = 'clusty'
 VERSION = '0.0.1'
 
 # Authors and maintainers
-AUTHORS = 'Laura Kinkead'
-MAINTAINER = 'Laura Kinkead'
-MAINTAINER_EMAIL = 'laura.kinkead@uzh.ch'
+AUTHORS = 'Matteo Berchier, Franziskus Liem'
+MAINTAINER = 'Matteo Berchier'
+MAINTAINER_EMAIL = 'matteo.berchier@uzh.ch'
 
 # License
 LICENSE = 'MIT'
 
 # Project URLs
-REPOSITORY = 'https://github.com/uzh-dqbm-cmi/leonhard-med-mgmt'
-HOMEPAGE = 'https://github.com/uzh-dqbm-cmi/leonhard-med-mgmt'
+REPOSITORY = 'https://github.com/uzh-dqbm-cmi/clusty'
+HOMEPAGE = 'https://github.com/uzh-dqbm-cmi/clusty'
 PROJECT_URLS = {
     'Bug Tracker': f'{REPOSITORY}/issues',
     'Documentation': HOMEPAGE,
@@ -48,7 +48,7 @@ CLASSIFIERS = [
 # Package definition
 setup(name=NAME,
       version=VERSION,
-      description='',
+      description='Manager for batch jobs on HPC clusters',
       url=HOMEPAGE,
       packages=[
           NAME,
@@ -65,7 +65,7 @@ setup(name=NAME,
       install_requires=INSTALL_REQUIREMENTS,
       entry_points={
           'console_scripts': [
-              'clusty = leotools.launch_assistant:cluster_launch_assistant'
+              'clusty = clusty.launch_assistant:cluster_launch_assistant'
           ]
       },
       include_package_data=True,

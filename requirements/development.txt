@@ -1,4 +1,4 @@
-# -------------- Requirements for development --------------- #
+# -------------- Development requirements --------------- #
 # Production, testing and documentation packages
 -r production.txt
 -r testing.txt

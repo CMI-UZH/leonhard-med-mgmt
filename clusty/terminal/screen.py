@@ -8,8 +8,8 @@ from uuid import uuid4
 from typing import List, Tuple, Union
 import pexpect
 
-from leotools.terminal.shell import Shell
-from leotools.utils.validation import format_input_to_list
+from clusty.terminal.shell import Shell
+from clusty.utils.validation import format_input_to_list
 
 wait_period = 0.1
 

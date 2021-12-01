@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+"""
+Author: @matteobe
+"""
 
 import argparse
 from pathlib import Path
 
 import yaml
 
-from leotools.cluster.client import ClusterClient
+from clusty.clusters.client import ClusterClient
 
 
 epilog_str = """

@@ -6,8 +6,7 @@ tests/logs/
 .pytest_cache
 
 # Python packaging
-leotools.egg-info
-codesync/
+*.egg-info
 
 # Caching
 __pycache__

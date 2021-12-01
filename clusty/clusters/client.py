@@ -8,7 +8,7 @@ import importlib
 
 import pexpect
 
-from leotools.configs.parser import ConfigsParser
+from clusty.configs.parser import ConfigsParser
 
 
 class ClusterClient:
@@ -34,7 +34,7 @@ class ClusterClient:
             raise ValueError(f"Invalid cluster name passed in.\n"
                              f"Valid cluster names: {','.join(list(ClusterClient.clusters.keys()))}")
 
-        self._cluster = getattr(importlib.import_module(f"leotools.cluster"), ClusterClient.clusters[cluster])()
+        self._cluster = getattr(importlib.import_module(f"clusty.clusters"), ClusterClient.clusters[cluster])()
 
     def start(self):
         """
