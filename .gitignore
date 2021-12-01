@@ -5,6 +5,9 @@
 tests/logs/
 .pytest_cache
 
+# Documentation
+docs/build/
+
 # Python packaging
 *.egg-info
 

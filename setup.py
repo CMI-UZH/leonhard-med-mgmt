@@ -1,9 +1,11 @@
 from os import path
 from setuptools import setup
 
+from clusty import __version__
+
 # Project
 NAME = 'clusty'
-VERSION = '0.0.1'
+VERSION = __version__
 
 # Authors and maintainers
 AUTHORS = 'Matteo Berchier, Franziskus Liem'
