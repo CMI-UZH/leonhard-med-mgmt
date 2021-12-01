@@ -9,15 +9,18 @@ from leotools.cluster.client import ClusterClient
 
 
 epilog_str = """
-EXAMPLE USAGE
+**** Example usage ****
 Launch a cluster setup:
-    launch_cluster --config /path/to/custom/config/file\n
+    clusty start --config /path/to/custom/config/file\n
+
+Stop a cluster setup:
+    clusty stop --config /path/to/custom/config/file\n
 """
 
 
-def launch_assistant():
+def cluster_launch_assistant():
     """
-    Cluster computing launch assistant
+    Cluster computing (HPC) environment launch assistant
 
     Takes care of launching an SSH connection to a specified cluster, creating screens to execute commands,
     launch Singularity images and Jupyter notebooks, as well as tunneling jupyter notebooks through SSH.
@@ -26,8 +29,10 @@ def launch_assistant():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, epilog=epilog_str)
     parser.add_argument('action', nargs='?', default='start', choices=['start', 'stop'])
     parser.add_argument('-c', '--config', type=str,
-                        default=str((Path('.') / ".launch_assistant.yaml").resolve()),
-                        help="Specify a custom YAML configuration file to be used for the launch assistant.\n")
+                        default=str((Path('.') / ".clusty.yaml").resolve()),
+                        help="Specify a custom YAML configuration file to be used for the launch assistant.\n"
+                             "By default the file .clusty.yaml is used (if it exists in the current directory.")
+
     args = parser.parse_args()
 
     with open(args.config) as file:
@@ -42,4 +47,4 @@ def launch_assistant():
 
 
 if __name__ == "__main__":
-    launch_assistant()
+    cluster_launch_assistant()

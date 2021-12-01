@@ -39,7 +39,7 @@ def validate_schema(document: Dict, schema: Dict, allow_unknown: bool = False, r
     normalized_document = v.normalized(document=document, schema=schema)
 
     if not v.validate(document=normalized_document, schema=schema):
-        raise ValidationError(f"Document is invalid according to the pre-defined schema."
+        raise ValidationError(f"Document is invalid according to the pre-defined schema.\n"
                               f"The following errors where detected: {v.errors}")
 
     return normalized_document

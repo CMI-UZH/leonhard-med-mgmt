@@ -65,8 +65,7 @@ setup(name=NAME,
       install_requires=INSTALL_REQUIREMENTS,
       entry_points={
           'console_scripts': [
-              'code_sync = leotools.code_sync:main',
-              'launch_cluster = leotools.launch_assistant:launch_assistant'
+              'clusty = leotools.launch_assistant:cluster_launch_assistant'
           ]
       },
       include_package_data=True,

@@ -2,17 +2,18 @@
 
 # Cluster definition: define which cluster the user wants to use
 cluster:
-  id: leomed                    # Identifies the class to be used for login and other procedures
-  host: medinfmk                # Name of ssh host to use to connect to (not required: default is set by cluster class)
-  setup: False                  # Define if the setup of the cluster in the ssh local file is necessary (not required)
-  batch_jobs:                   # List of batch jobs that can be launched in parallel on the cluster
-    - name                      # Name identifying the batch job to run, listed here in the correct order
+  id: leomed                      # Identifies the class to be used for login and other procedures
+  host: medinfmk                  # Name of ssh host to use to connect to (not required: default is set by cluster class)
+  setup: False                    # Define if the setup of the cluster in the ssh local file is necessary (not required)
+  batch_jobs:                     # List of batch jobs that can be launched in parallel on the cluster
+    - jupyter                     # Name identifying the batch job to run, listed here in the correct order
+    - manual
 
 # Batch jobs definition
 batch_jobs:
-  name:                           # Some identifier for the batch job - used to name the screen where this is launched
+  jupyter:                        # Some identifier for the batch job - used to name the screen where this is launched
     id: notebook                  # Name to be used for the screen to identify it (defaults to the batch_job name)
-    duration: 1                   # Duration of the batch job in hours
+    duration: 1                   # Duration of the batch job in hours # TODO: Get IP address after starting batch job., so that it can be used for all tunnels to a batch job
     cpu: 1                        # Number of CPU cores requested
     memory: 10                    # Memory required per core in GB
     gpu: 0                        # Number of GPUs attached to batch job
@@ -25,9 +26,9 @@ batch_jobs:
       - cd /opt/project           # Actual shell command to run in the batch screen
       - JUPYTER                   # Run the jupyter command (special flag)
     singularity:
-      image: $PROJECT_DIR/containers/schupbach.img                 # Image to use
+      image: $PROJECT_DIR/containers/schupbach.img    # Image to use
       home: $HOME                 # Home binding
       bindings:
         - $PROJECT_DIR:/opt/project   # Directories binding
-    jupyter:
-      port: 8101                  # Tunnelling binding port
+    jupyter:                      # TODO: add possibility for choosing lab vs. notebook command, choosing home dir, r/py
+      port: 8102                  # Tunnelling binding port
