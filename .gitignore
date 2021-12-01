@@ -1,9 +1,8 @@
 # Virtual environment
-venv
 .venv
+venv
 
 # Testing
-tests/logs/
 .pytest_cache
 
 # Documentation
@@ -20,3 +19,4 @@ __pycache__
 
 # Local data
 local/
+logs/
