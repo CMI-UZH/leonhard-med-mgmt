@@ -4,7 +4,6 @@ The ``clusty`` package is meant to be used for quickly setting up of repetitive 
 environment, such as a high performance computing (HPC) environment in research, or even for cloud machines, 
 which require SSH authentication and repeated setup.
 
-
 ## Get started
 
 To get started, a user can run the example by executing the following code in the root directory of this repository. 
@@ -31,9 +30,6 @@ cluster residing with the Swiss Federal Institute of Technology (ETH).
 #### LeonhardMed @ ETH
 
 #### Euler @ ETH
-
-
-
 
 
 ## Contributing
