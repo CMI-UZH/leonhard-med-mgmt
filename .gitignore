@@ -15,7 +15,7 @@ docs/build/
 __pycache__
 
 # IDEs
-.idea
+.idea/
 
 # Local data
 local/
