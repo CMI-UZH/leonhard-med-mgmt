@@ -9,7 +9,7 @@ import importlib
 import pexpect
 
 from clusty.configs.parser import ConfigsParser
-
+from clusty.terminal.screen import Screen
 
 class ClusterClient:
     """
@@ -77,10 +77,27 @@ class ClusterClient:
                 else:
                     self._cluster.run(screens=screens, commands=cmd)
 
+
     def stop(self):
         """
         Stop all the steps as they are defined in the configuration file
         """
         # Close all screens created during the process of launching the cluster
-        # TODO: Implement the procedure to close the screens
-        pass
+        cluster_screen_name, _, batch_jobs, _ = self._configs.get_cluster_config()
+        terminal = Screen.attach(cluster_screen_name)
+        for batch_job in batch_jobs:
+            batch_screen_name = self._configs.get_batch_job_screen_name(batch_job)
+            batch_screens = Screen.list(batch_screen_name, terminal=terminal)
+            for _, batch_screen, _ in batch_screens:
+                print(f"quitting screen {cluster_screen_name}, {batch_screen}")
+                Screen.quit(batch_screen, terminal)
+        print(f"quitting screen {cluster_screen_name}")
+        Screen.detach(terminal)
+        Screen.quit(cluster_screen_name)
+
+        tunnel_screens = Screen.list("tunnel")
+        for _, tunnel_screen, _ in tunnel_screens:
+            print(f"quitting screen {tunnel_screen}")
+            Screen.quit(tunnel_screen)
+        
+        print(f"Closed all screens for {cluster_screen_name}")

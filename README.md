@@ -14,6 +14,11 @@ To get started, a user can run the example by executing the following code in th
 clusty start --config example.yaml
 ```
 
+To stop all jobs and kill all screens, run
+```
+clusty stop --config example.yaml
+```
+
 ## Configure clusty
 
 The configuration for the 
