@@ -17,7 +17,7 @@ class Screen:
     Screen class packages utilities for creating and attaching to screens
     """
 
-    wait_period = 0.1
+    wait_period = 1
 
     @classmethod
     def create(cls, name: str = None, unique: bool = True, terminal: pexpect.spawn = None) -> str:
@@ -83,15 +83,15 @@ class Screen:
             terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=Screen.wait_period)
             screen_list = terminal.before.decode()
 
-        screen_pattern = re.compile(r"([0-9]{3,6})\.(\w+)\s+(\(Detached\)|\(Attached\))", re.MULTILINE)
+        # IMPROVE: Check why \s+ regex not matching whitespace in the screen -ls name output
+        screen_pattern = re.compile(r"([0-9]{3,6})\.(\w+).+(\(Detached\)|\(Attached\))", re.MULTILINE)
         matched_screens = screen_pattern.findall(screen_list)
+        matched_screens = list(set(matched_screens))
 
         # Select the screens to return
         screens = list()
         for screen_id, screen_name, attach_status in matched_screens:
-            add_screen = True
-            if exact_name_match and not screen_name == name:
-                add_screen = False
+            add_screen = False if exact_name_match and not screen_name == name else True
 
             if add_screen:
                 screen = (screen_id, screen_name, True if attach_status == "(Detached)" else False)

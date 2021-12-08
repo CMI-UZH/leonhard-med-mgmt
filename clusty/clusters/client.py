@@ -60,23 +60,14 @@ class ClusterClient:
                                                **self._configs.get_batch_job_specs(batch_job))
             screens = [cluster_screen, batch_screen]
 
-            print('After batch')
-            print(Screen.list())
-
             # Read the IP address
             batch_job_ip_address = self._cluster.ip_address(screens=screens)
             tunnels_ips[batch_job] = batch_job_ip_address
-
-            print('After IP')
-            print(Screen.list())
 
             # Load environment variables
             env_vars = self._configs.get_batch_job_env(batch_job)
             if env_vars is not None:
                 self._cluster.run(screens=screens, commands=env_vars)
-
-            print('After env')
-            print(Screen.list())
 
             # Run commands list
             for cmd in self._configs.get_batch_job_commands(batch_job):
@@ -89,9 +80,6 @@ class ClusterClient:
                     links.append(url_local)
                 else:
                     self._cluster.run(screens=screens, commands=cmd)
-
-            print('After run')
-            print(Screen.list())
 
         # Create the tunnels
         tunnels = replace_by_dict(values=tunnels, replace=tunnels_ips)
@@ -110,21 +98,24 @@ class ClusterClient:
     # TODO: Problem, because screen name is not same as cluster name
     def stop(self):
         """
-        Stop all the steps as they are defined in the configuration file
+        Close all the screens defined in the configuration file, and as a consequence stop all the processes launched
+        inside those screens.
         """
-        # Close all screens created during the process of launching the cluster
+
         cluster_screen_name, _, batch_jobs, _, _ = self._configs.get_cluster_config()
         cluster_screens = Screen.list(name=cluster_screen_name)
 
         if cluster_screens:
-            terminal = Screen.attach(screen=cluster_screen_name)
+            cluster_screen_id, cluster_screen, _ = cluster_screens[0]
+            terminal = Screen.attach(screen=cluster_screen_id)
 
             for batch_job in batch_jobs:
                 batch_screen_name = self._configs.get_batch_job_screen_name(batch_job)
                 batch_screens = Screen.list(name=batch_screen_name, terminal=terminal)
+
                 for _, batch_screen, _ in batch_screens:
                     Screen.kill(name=batch_screen, terminal=terminal)
-                    print(f"Quit screen '{batch_screen}' inside screen '{cluster_screen_name}'.")
+                    print(f"Quit screen '{batch_screen}' inside screen '{cluster_screen}'.")
 
             Screen.detach(terminal)
 
@@ -132,10 +123,10 @@ class ClusterClient:
             Screen.kill(cluster_screen_id)
             print(f"Quit screen '{cluster_screen}'.")
 
-        tunnel_screens = Screen.list("tunnel")
-        for _, tunnel_screen, _ in tunnel_screens:
-            Screen.kill(tunnel_screen)
-            print(f"Quit screen '{tunnel_screen}'.")
+        tunnels = Screen.list(name="tunnel")
+        for _, screen_name, _ in tunnels:
+            Screen.kill(screen_name)
+            print(f"Quit screen '{screen_name}'.")
 
         if cluster_screens:
             print(f"Completed closing of all screens.")
