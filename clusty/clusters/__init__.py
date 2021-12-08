@@ -1,1 +1,1 @@
-from clusty.clusters.ETH.leomed import LeonhardMed
+from clusty.clusters.ETH.leonhard_med import LeonhardMed

@@ -2,6 +2,7 @@
 Author: @matteobe
 """
 
+from __future__ import annotations
 import re
 import getpass
 import pexpect
@@ -15,15 +16,22 @@ from clusty.clusters.cluster import Cluster
 class LeonhardMed(Cluster):
     """
     Class responsible for login procedures and batch jobs launching on the LeonhardMed cluster at ETH Zurich.
-
-
     """
+
+    # Defaults
+    ssh_alias = "medinfmk"
+    id = "leonhardmed"
+    name = "LeonhardMed"
 
     wait_period = 0.1
 
-    def __init__(self, ssh_alias: str = "medinfmk"):
-        super().__init__(cluster_id="leomed",
-                         name="LeonhardMed",
+    # TODO: Add tenant parameter
+    def __init__(self, ssh_alias: str = None):
+        if ssh_alias is None:
+            ssh_alias = LeonhardMed.ssh_alias
+
+        super().__init__(cluster_id=LeonhardMed.id,
+                         name=LeonhardMed.name,
                          host_address="login.medinfmk.leonhard.ethz.ch",
                          ssh_alias=ssh_alias)
 
@@ -33,19 +41,19 @@ class LeonhardMed(Cluster):
 
         # Gather the required user input
         user = input(f"ETHZ / {self._name} username: ")
-        leomed_key = input(f"{self._name} SSH key file (Press Enter for default: leomed): ")
-        leomed_key = "leomed" if leomed_key == "" else leomed_key
+        leomed_key = input(f"{self._name} SSH key file (Press Enter for default: {self._id}): ")
+        leomed_key = self._id if leomed_key == "" else leomed_key
         sciencecloud_key = input("ScienceCloud SSH key file (Press Enter for default: sciencecloud): ")
         sciencecloud_key = "sciencecloud" if sciencecloud_key == "" else sciencecloud_key
         port = int(input(f"Port to use to attach to {self._name}: "))
 
         # Configure the SSH hosts
         config_host(ssh_alias=self._ssh_alias, host_name=self._host_address, user=user, ssh_key=leomed_key,
-                    proxy_host_name="jump.leomed.ethz.ch")
-        config_host(ssh_alias="medinfmk_home", host_name=self._host_address, user=user, ssh_key=leomed_key,
-                    proxy_jump="leomed_jump", forward_port=port)
-        config_host(ssh_alias="leomed_jump", host_name="jump.leomed.ethz.ch", user=user, proxy_jump="sciencecloud_jump",
-                    forward_port=port)
+                    proxy_host_name="jump.leonhard.ethz.ch")
+        config_host(ssh_alias=f"{self._ssh_alias}_home", host_name=self._host_address, user=user,
+                    ssh_key=leomed_key, proxy_jump=f"{self._id}_jump", forward_port=port)
+        config_host(ssh_alias=f"{self._id}_jump", host_name="jump.leonhard.ethz.ch", user=user,
+                    proxy_jump="sciencecloud_jump", forward_port=port)
         config_host(ssh_alias="sciencecloud_jump", host_name="172.23.2.77", user=user, ssh_key=sciencecloud_key,
                     forward_port=port)
 
@@ -54,7 +62,7 @@ class LeonhardMed(Cluster):
     def login(self, ssh_alias: str = None, binding: str = None, name: str = None) -> str:
         """Login to the LeonhardMed cluster"""
 
-        ssh_alias = "medinfmk" if ssh_alias is None else ssh_alias
+        ssh_alias = LeonhardMed.ssh_alias if ssh_alias is None else ssh_alias
 
         # Create and attach to a screen
         screen_name = self._id if name is None else name
@@ -99,7 +107,7 @@ class LeonhardMed(Cluster):
         # If error in connection, kill screen and print error
         if (not login_success and (not verification_code_success or not password_success)) or connection_timeout:
 
-            Screen.quit(screen_name)
+            Screen.kill(screen_name)
             msg = ""
             if connection_timeout:
                 msg = f"Connection to {self._name} at {ssh_alias} timed out."
@@ -109,7 +117,7 @@ class LeonhardMed(Cluster):
                 msg = "Incorrect password entered 3 times. Connection not established."
             raise ConnectionRefusedError(msg)
         else:
-            print(f"Connected to LeonhardMed on screen: {screen_name}")
+            print(f"Connected to LeonhardMed on screen: '{screen_name}'")
 
         return screen_name
 
@@ -149,7 +157,7 @@ class LeonhardMed(Cluster):
             print(f"... batch job nr. '{job[0]}' launched on machine '{machine[0]}'")
         else:
             print(f"... could not start the batch job on {self._name}")
-            Screen.quit(batch_screen, terminal)
+            Screen.kill(batch_screen, terminal)
 
         # Detach from the Leomed screen
         Screen.detach(terminal)
