@@ -21,3 +21,5 @@ __pycache__
 
 # Local data
 local/
+logs/
+notebooks/

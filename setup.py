@@ -8,7 +8,7 @@ NAME = 'clusty'
 VERSION = __version__
 
 # Authors and maintainers
-AUTHORS = 'Matteo Berchier, Franziskus Liem'
+AUTHORS = 'Matteo Berchier, Franz Liem'
 MAINTAINER = 'Matteo Berchier'
 MAINTAINER_EMAIL = 'matteo.berchier@uzh.ch'
 

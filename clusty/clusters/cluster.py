@@ -4,7 +4,8 @@ Author: @matteobe
 
 import re
 from abc import ABC, abstractmethod
-from typing import Union, List, Tuple
+from typing import Union, List
+import time
 
 import pexpect
 
@@ -17,6 +18,8 @@ class Cluster(ABC):
     Interface definition for a computing cluster, which includes the definition of the cluster identifier,
     the host address and the SSH alias used to access the cluster
     """
+
+    wait_period = 0.1
 
     def __init__(self, cluster_id: str, name: str, host_address: str, ssh_alias: str = None):
         self._id = cluster_id
@@ -34,6 +37,22 @@ class Cluster(ABC):
         """Login to the cluster"""
         pass
 
+    @staticmethod
+    def ip_address(screens: List[str]) -> str:
+        """Retrieve the IP address of a nested screen"""
+
+        terminal = Screen.attach_nested(screens=screens)
+        terminal.sendline("hostname -i")
+        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=1)
+        output = terminal.before.decode()
+        Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
+
+        # Retrieve the IP address for port forwarding
+        regex_ip_address = re.compile(r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}", re.MULTILINE)
+        ip_address = regex_ip_address.findall(output)[0]
+
+        return ip_address
+
     @abstractmethod
     def batch(self, *args, **kwargs):
         """Start a batch job on the cluster"""
@@ -50,8 +69,6 @@ class Cluster(ABC):
             terminal.sendline(cmd)
             terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=1)
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
-
-        return None
 
     def launch_singularity(self, screens: List[str], image: str, home_dir: str = None,
                            bindings: Union[str, List[str]] = None, gpu: bool = False) -> None:
@@ -74,7 +91,7 @@ class Cluster(ABC):
 
         Screen.detach_nested(terminal=terminal, depth=len(screens), terminate=True)
 
-    def launch_jupyter(self, screens: List[str], port: int) -> Tuple[str, str]:
+    def launch_jupyter(self, screens: List[str], port: int) -> str:
         """Launch a Jupyter notebook inside nested screens (listed from outward to inward)"""
 
         terminal = Screen.attach_nested(screens=screens)
@@ -92,9 +109,8 @@ class Cluster(ABC):
         protocol, address, port, token = notebook_url.findall(jupyter_output)[0]
         url_remote = f"{protocol}://{address}:{port}/?token={token}"
         url_local = f"{protocol}://127.0.0.1:{port}/?token={token}"
-        binding = f"{port}:{address}:{port}"
 
         print(f"Jupyter notebook launched at: {url_remote}")
         print(f"... access it on your local machine at: {url_local}")
 
-        return url_local, binding
+        return url_local

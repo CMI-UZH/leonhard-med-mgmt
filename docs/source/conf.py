@@ -15,7 +15,7 @@ from clusty import __version__
 # Project information --------------------------------------------------------
 project = 'clusty'
 copyright = '2021, Krauthammer Lab, University Zurich'
-author = 'Matteo Berchier'
+author = 'Matteo Berchier, Franz Liem'
 
 # The full version, including alpha/beta/rc tags
 release = __version__
