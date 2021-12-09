@@ -7,13 +7,13 @@ cluster:
   setup: False                    # Define if the setup of the cluster in the ssh local file is necessary (not required)
   batch_jobs:                     # List of batch jobs that can be launched in parallel on the cluster
     - jupyter                     # Name identifying the batch job to run, listed here in the correct order
-  tunnels:                        # Tunnel bindings
+  tunnels:                        # Tunnel bindings with name of batch job
     - 8102:jupyter:8102
 
 # Batch jobs definition
 batch_jobs:
   jupyter:                        # Some identifier for the batch job - used to name the screen where this is launched
-    id: notebook                  # Name to be used for the screen to identify it (defaults to the batch_job name)
+    screen: notebook              # Name to be used for the screen to identify it (defaults to the batch_job name)
     duration: 1                   # Duration of the batch job in hours # TODO: Get IP address after starting batch job., so that it can be used for all tunnels to a batch job
     cpu: 1                        # Number of CPU cores requested
     memory: 10                    # Memory required per core in GB

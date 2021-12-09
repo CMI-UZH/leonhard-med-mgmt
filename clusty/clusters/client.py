@@ -56,7 +56,7 @@ class ClusterClient:
         tunnels_ips = dict()
         for batch_job in batch_jobs:
             batch_screen = self._cluster.batch(screens=[cluster_screen,
-                                                        self._configs.get_batch_job_screen_name(batch_job)],
+                                                        self._configs.get_batch_job_screen(batch_job)],
                                                **self._configs.get_batch_job_specs(batch_job))
             screens = [cluster_screen, batch_screen]
 
@@ -110,7 +110,7 @@ class ClusterClient:
             terminal = Screen.attach(screen=cluster_screen_id)
 
             for batch_job in batch_jobs:
-                batch_screen_name = self._configs.get_batch_job_screen_name(batch_job)
+                batch_screen_name = self._configs.get_batch_job_screen(batch_job)
                 batch_screens = Screen.list(name=batch_screen_name, terminal=terminal)
 
                 for _, batch_screen, _ in batch_screens:

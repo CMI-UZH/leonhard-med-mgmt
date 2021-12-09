@@ -27,16 +27,20 @@ batch_jobs:
   valuesrules:
     type: dict
     schema:
-      id:
+      screen:
         type: string
+        required: False
       duration:
         type: integer
+        required: False
         default: 24
       cpu:
         type: integer
+        required: False
         default: 1
       memory:
         type: integer
+        required: False
         default: 10
       gpu:
         type: integer
@@ -53,6 +57,7 @@ batch_jobs:
           type: string
       run:
         type: list
+        required: False
         schema:
           type: string
       singularity:
