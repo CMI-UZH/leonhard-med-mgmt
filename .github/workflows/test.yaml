@@ -1,12 +1,11 @@
 # Automated package testing
 
-# TODO: Fix problem: gets triggered on pull request to staging from dev
 name: Test code
 on:
   push:
     branches-ignore:
       - staging
-      - readthedocs
+      - main
 
 jobs:
   test:

@@ -1,10 +1,10 @@
-# Publish package to PyPi
+# Publish package to TestPyPi
 
-name: Build and publish to PyPi
+name: Build and publish to TestPyPi
 on:
   push:
-    tags:
-      - '^v(\d+)\.(\d+)\.(\d+)$'
+    branches:
+      - staging
 
 jobs:
   build-and-publish:
@@ -26,8 +26,9 @@ jobs:
       - name: Build distributions
         run: python3 setup.py sdist bdist_wheel
 
-      - name: Publish to PyPi
+      - name: Publish to TestPyPi
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
-          password: ${{ secrets.pypi_token }}
+          password: ${{ secrets.testpypi_token }}
+          repository_url: https://test.pypi.org/legacy/

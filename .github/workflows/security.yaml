@@ -7,16 +7,13 @@ on:
   push:
     branches:
       - staging
-      - master
   pull_request:
     branches:
       - staging
-      - master
 
 jobs:
   security-analysis:
     name: Security analysis with GitHub CodeQL
-    if: ${{ false }}
     runs-on: ubuntu-latest
 
     strategy:

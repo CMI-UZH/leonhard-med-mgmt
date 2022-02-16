@@ -1,16 +1,14 @@
 # Build documentation of ReadTheDocs
 
-# TODO: Fix problem: gets triggered when rebasing dev from master
 name: Document on ReadTheDocs
 on:
   push:
     tags:
-      - v*
+      - '^v(\d+)\.(\d+)\.(\d+)$'
 
 jobs:
   document:
     name: Documentation build on ReadTheDocs
-    if: ${{ false }}
     runs-on: ubuntu-latest
 
     steps:
