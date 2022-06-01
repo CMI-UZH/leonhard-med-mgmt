@@ -12,19 +12,17 @@ from clusty.terminal.ssh import config_host
 from clusty.clusters.cluster import Cluster
 
 
-class LeonhardMed(Cluster):
+class LeoMed2(Cluster):
     """
-    Class responsible for login procedures and batch jobs launching on the LeonhardMed cluster at ETH Zurich.
-
-
+    Class responsible for login procedures and batch jobs launching on the LeoMed 2.0 cluster at ETH Zurich.
     """
 
     wait_period = 0.1
 
     def __init__(self, ssh_alias: str = "medinfmk"):
-        super().__init__(cluster_id="leomed",
-                         name="LeonhardMed",
-                         host_address="login.medinfmk.leonhard.ethz.ch",
+        super().__init__(cluster_id="leomed2",
+                         name="Leomed 2.0",
+                         host_address="login-medinfmk.leonhard.ethz.ch",
                          ssh_alias=ssh_alias)
 
     def setup(self) -> None:
@@ -41,11 +39,9 @@ class LeonhardMed(Cluster):
 
         # Configure the SSH hosts
         config_host(ssh_alias=self._ssh_alias, host_name=self._host_address, user=user, ssh_key=leomed_key,
-                    proxy_host_name="jump.leomed.ethz.ch")
-        config_host(ssh_alias="medinfmk_home", host_name=self._host_address, user=user, ssh_key=leomed_key,
-                    proxy_jump="leomed_jump", forward_port=port)
-        config_host(ssh_alias="leomed_jump", host_name="jump.leomed.ethz.ch", user=user, proxy_jump="sciencecloud_jump",
-                    forward_port=port)
+                    proxy_jump="jump-medinfmk.leomed.ethz.ch")
+        config_host(ssh_alias="medinfmk_jump", host_name="jump-medinfmk.leomed.ethz.ch", user=user,
+                    proxy_jump="sciencecloud_jump", forward_port=port)
         config_host(ssh_alias="sciencecloud_jump", host_name="172.23.2.77", user=user, ssh_key=sciencecloud_key,
                     forward_port=port)
 
@@ -113,7 +109,7 @@ class LeonhardMed(Cluster):
 
         return screen_name
 
-    def batch(self, screens: List[str], duration: int = 24, cpu: int = 10, memory: int = 10000, gpu: int = 0,
+    def batch(self, screens: List[str], duration: int = 24, cpu: int = 10, memory: int = 10, gpu: int = 0,
               gpu_model: str = 'GeForceGTX1080Ti') -> str:
         """
         Launch a batch job on LeoMed, with certain specifics
@@ -121,10 +117,10 @@ class LeonhardMed(Cluster):
         """
 
         if gpu == 0:
-            cmd = f'bsub -Is -W {duration}:00 -n {cpu} -R "rusage[mem={memory}]" bash'
+            cmd = f"srun --time {duration}:00:00 --cpus-per-task {cpu} --mem-per-cpu {memory} --partition gpu " \
+                  f"--gres gpu:{gpu} --pty bash"
         else:
-            cmd = f'bsub -Is -W {duration}:00 -n {cpu} -R "rusage[mem={memory},ngpus_excl_p=1]" '\
-                  f'-R "select[gpu_model0=={gpu_model}]" bash'
+            cmd = f"srun --time {duration}:00:00 --cpus-per-task {cpu} --mem-per-cpu {memory} --pty bash"
 
         # Attach to the LeoMed screen and create a screen where to launch the batch process
         terminal = Screen.attach_nested(screens=screens[:-1])

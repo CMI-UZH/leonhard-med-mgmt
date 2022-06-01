@@ -18,8 +18,8 @@ class ClusterClient:
     """
 
     clusters = {
-        'leonhardmed': 'LeonhardMed',
-        'leomed': 'LeonhardMed',
+        'leomed1': 'LeoMed1',
+        'leomed2': 'LeoMed2'
     }
 
     def __init__(self, configs: Dict):
