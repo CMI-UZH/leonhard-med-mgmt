@@ -117,10 +117,10 @@ class LeoMed2(Cluster):
         """
 
         if gpu == 0:
+            cmd = f"srun --time {duration}:00:00 --cpus-per-task {cpu} --mem-per-cpu {memory} --pty bash"
+        else:
             cmd = f"srun --time {duration}:00:00 --cpus-per-task {cpu} --mem-per-cpu {memory} --partition gpu " \
                   f"--gres gpu:{gpu} --pty bash"
-        else:
-            cmd = f"srun --time {duration}:00:00 --cpus-per-task {cpu} --mem-per-cpu {memory} --pty bash"
 
         # Attach to the LeoMed screen and create a screen where to launch the batch process
         terminal = Screen.attach_nested(screens=screens[:-1])
