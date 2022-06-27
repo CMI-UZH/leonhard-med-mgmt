@@ -8,7 +8,7 @@ cluster:
   batch_jobs:                     # List of batch jobs that can be launched in parallel on the cluster
     - jupyter                     # Name identifying the batch job to run, listed here in the correct order
   tunnels:                        # Tunnel bindings
-    - 8102:jupyter:8102
+    - 8103:jupyter:8103
 
 # Batch jobs definition
 batch_jobs:
@@ -32,21 +32,5 @@ batch_jobs:
       bindings:
         - $PROJECT_DIR:/opt/project   # Directories binding
     jupyter:                      # TODO: add possibility for choosing lab vs. notebook command, choosing home dir, r/py
-      flavor: notebook / r / lab  # Flavor of the jupyter to run
-      port: 8102                  # Tunnelling binding port
-
-  manual:
-    duration: 10
-    cpu: 2
-    memory: 5
-    env:
-      - PROJECT_DIR=/cluster/work/medinfmk/IFI_JB_001_OSMICI
-    run:
-      - SINGULARITY
-      - cd /opt/project
-      - JUPYTER
-    singularity:
-      image: $PROJECT_DIR/containers/schupbach.img
-      home: $HOME
-      bindings:
-        - $PROJECT_DIR:/opt/project
+      port: 8103                  # Tunnelling binding port
+      # flavor: notebook / r / lab  # Flavor of the jupyter to run

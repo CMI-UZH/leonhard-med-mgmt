@@ -97,7 +97,7 @@ class LeoMed1(Cluster):
         # If error in connection, kill screen and print error
         if (not login_success and (not verification_code_success or not password_success)) or connection_timeout:
 
-            Screen.quit(screen_name)
+            Screen.kill(screen_name)
             msg = ""
             if connection_timeout:
                 msg = f"Connection to {self._name} at {ssh_alias} timed out."
@@ -128,7 +128,7 @@ class LeoMed1(Cluster):
         terminal = Screen.attach_nested(screens=screens[:-1])
         batch_screen = Screen.create(name=screens[-1], terminal=terminal)
         terminal.sendline(f"screen -r {batch_screen}")
-        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=LeonhardMed.wait_period)
+        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=LeoMed1.wait_period)
 
         # Launch the batch process
         print(f"Launching batch job on {self._name} in screen '{batch_screen}'...")
@@ -147,7 +147,7 @@ class LeoMed1(Cluster):
             print(f"... batch job nr. '{job[0]}' launched on machine '{machine[0]}'")
         else:
             print(f"... could not start the batch job on {self._name}")
-            Screen.quit(batch_screen, terminal)
+            Screen.kill(batch_screen, terminal)
 
         # Detach from the Leomed screen
         Screen.detach(terminal)

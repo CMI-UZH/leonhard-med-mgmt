@@ -37,6 +37,21 @@ cluster residing with the Swiss Federal Institute of Technology (ETH).
 #### Euler @ ETH
 
 
+## Documentation
+
+To build the documentation, install the documentation environment using: 
+
+```
+pip install -r requirements/documentation.txt
+```
+
+and then run the following command: 
+
+```
+source cicd/doc.sh run
+```
+
+
 ## Contributing
 
 New standard functions to be executed on a cluster are welcomed to be added to the configuration file, e.g. Docker, 

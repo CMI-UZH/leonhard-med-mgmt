@@ -2,7 +2,6 @@
 Author: @matteobe
 """
 
-import re
 import getpass
 import pexpect
 from typing import List
@@ -47,10 +46,8 @@ class LeoMed2(Cluster):
 
         print(f"ssh-config: setup of {self._name} completed.")
 
-    def login(self, ssh_alias: str = None, binding: str = None, name: str = None) -> str:
+    def login(self, ssh_alias: str = 'medinfmk', binding: str = None, name: str = None) -> str:
         """Login to the LeonhardMed 2.0 cluster"""
-
-        ssh_alias = "medinfmk" if ssh_alias is None else ssh_alias
 
         # Create and attach to a screen
         screen_name = self._id if name is None else name
@@ -64,7 +61,9 @@ class LeoMed2(Cluster):
         # Login procedure
         verification_code_success = False
         password_success = False
-        response = terminal.expect_exact(['Verification code', 'Welcome', pexpect.EOF, pexpect.TIMEOUT], timeout=10)
+        response = terminal.expect_exact(['Verification code',
+                                          'Last login: ',
+                                          pexpect.EOF, pexpect.TIMEOUT], timeout=10)
         login_success = (response == 1)
         connection_timeout = (response == 3)
 
@@ -95,7 +94,7 @@ class LeoMed2(Cluster):
         # If error in connection, kill screen and print error
         if (not login_success and (not verification_code_success or not password_success)) or connection_timeout:
 
-            Screen.quit(screen_name)
+            Screen.kill(screen_name)
             msg = ""
             if connection_timeout:
                 msg = f"Connection to {self._name} at {ssh_alias} timed out."
@@ -134,22 +133,9 @@ class LeoMed2(Cluster):
         print(f"Launching batch job on {self._name} in screen '{batch_screen}'...")
         terminal.sendline(cmd)
         terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=30)
-        batch_output = terminal.before.decode()
 
-        job_pattern = re.compile(r"Job <([0-9]{3,5})> is submitted to queue", re.MULTILINE)
-        machine_pattern = re.compile(r"<<Starting on ([-\w]+)>>", re.MULTILINE)
-        job = job_pattern.findall(batch_output)
-        machine = machine_pattern.findall(batch_output)
-
-        # Detach from the batch screen
+        # Detach from the batch screen and the Leomed screen
         Screen.detach(terminal, level=2)
-        if len(job) == 1:
-            print(f"... batch job nr. '{job[0]}' launched on machine '{machine[0]}'")
-        else:
-            print(f"... could not start the batch job on {self._name}")
-            Screen.quit(batch_screen, terminal)
-
-        # Detach from the Leomed screen
         Screen.detach(terminal)
         terminal.close()
 
