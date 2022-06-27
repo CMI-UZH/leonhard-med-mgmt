@@ -39,7 +39,7 @@ class ConfigsParser:
 
     def get_batch_job_screen_name(self, batch_job: str) -> str:
         configs = self.get_batch_job_configs(batch_job)
-        screen = configs.get('id', batch_job)
+        screen = configs.get('screen', batch_job)
         return screen
 
     def get_batch_job_specs(self, batch_job: str) -> dict:
