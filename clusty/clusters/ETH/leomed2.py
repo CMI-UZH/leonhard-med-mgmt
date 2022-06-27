@@ -61,11 +61,13 @@ class LeoMed2(Cluster):
         # Login procedure
         verification_code_success = False
         password_success = False
-        response = terminal.expect_exact(['Verification code',
-                                          'Last login: ',
+
+        # TODO: Make parsing of terminal output more resilient to all outputs from LEOMED
+        response = terminal.expect_exact(['Verification code:', 'Authorized uses only.',
+                                          'Last login:',
                                           pexpect.EOF, pexpect.TIMEOUT], timeout=10)
-        login_success = (response == 1)
-        connection_timeout = (response == 3)
+        login_success = (response == 2)
+        connection_timeout = (response == 4)
 
         if not login_success and not connection_timeout:
             print(f"Welcome to the {self._name} login:")
