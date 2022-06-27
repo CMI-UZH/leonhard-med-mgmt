@@ -4,5 +4,6 @@
 -r testing.txt
 -r documentation.txt
 
-# Jupyter notebooks
+# Jupyter
 jupyter
+jupyterlab

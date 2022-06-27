@@ -7,7 +7,8 @@ cluster:
   setup: False                    # Define if the setup of the cluster in the ssh local file is necessary (not required)
   batch_jobs:                     # List of batch jobs that can be launched in parallel on the cluster
     - jupyter                     # Name identifying the batch job to run, listed here in the correct order
-    - manual
+  tunnels:                        # Tunnel bindings
+    - 8102:jupyter:8102
 
 # Batch jobs definition
 batch_jobs:
@@ -31,6 +32,7 @@ batch_jobs:
       bindings:
         - $PROJECT_DIR:/opt/project   # Directories binding
     jupyter:                      # TODO: add possibility for choosing lab vs. notebook command, choosing home dir, r/py
+      flavor: notebook / r / lab  # Flavor of the jupyter to run
       port: 8102                  # Tunnelling binding port
 
   manual:

@@ -1,5 +1,5 @@
 """
-Create and attach to screens
+Author: @matteobe
 """
 
 import time
@@ -11,14 +11,13 @@ import pexpect
 from clusty.terminal.shell import Shell
 from clusty.utils.validation import format_input_to_list
 
-wait_period = 0.1
-
 
 class Screen:
-    """Create a screen class, as a entry point for static methods for dealing with screens"""
+    """
+    Screen class packages utilities for creating and attaching to screens
+    """
 
-    def __init__(self):
-        pass
+    wait_period = 1
 
     @classmethod
     def create(cls, name: str = None, unique: bool = True, terminal: pexpect.spawn = None) -> str:
@@ -33,7 +32,7 @@ class Screen:
             name = f"{name}_{str(uuid4().hex[0:4])}"
 
         terminal.sendline(f"screen -dmS {name}")
-        time.sleep(wait_period)
+        time.sleep(Screen.wait_period)
 
         if not terminal_passed_in:
             terminal.close(force=True)
@@ -41,28 +40,28 @@ class Screen:
         return name
 
     @staticmethod
-    def quit(name: str, terminal: pexpect.spawn = None) -> None:
-        """Quit a screen with the given name or identifier"""
+    def kill(name: str, terminal: pexpect.spawn = None) -> None:
+        """Kill a screen with the given name or identifier"""
 
         terminal_passed_in = (terminal is not None)
         terminal = Shell() if terminal is None else terminal
         if terminal is None:
             terminal = Shell()
 
-        cmd = f"screen -XS {name} quit"
+        cmd = f"screen -XS {name} kill"
         terminal.sendline(cmd)
-        time.sleep(wait_period)
+        time.sleep(Screen.wait_period)
 
         if not terminal_passed_in:
             terminal.close(force=True)
 
     @classmethod
-    def quit_all(cls, name: str = None, exact_name_match: bool = True) -> None:
-        """Quit all screens which match the passed-in name exactly or partially (depending on exact_name_match flag)"""
+    def kill_all(cls, name: str = None, exact_name_match: bool = True) -> None:
+        """Kill all screens which match the passed-in name exactly or partially (depending on exact_name_match flag)"""
 
         screen_list = cls.list(name=name, exact_name_match=exact_name_match)
         for screen in screen_list:
-            cls.quit(name=screen[0])
+            cls.kill(name=screen[0])
 
     @staticmethod
     def list(name: str = None, exact_name_match: bool = False, terminal: pexpect.spawn = None) \
@@ -81,18 +80,18 @@ class Screen:
             #  workaround avoids an error, but is not technically correct. The downside of the current method is that
             #  the execution needs to wait for the timeout in order to continue.
             #  The before property stores ALL the shell output, not just the output of the screen.
-            terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=wait_period)
+            terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=Screen.wait_period)
             screen_list = terminal.before.decode()
 
-        screen_pattern = re.compile(r"([0-9]{4,6})\.(\w+)\s+(\(Detached\)|\(Attached\))", re.MULTILINE)
+        # IMPROVE: Check why \s+ regex not matching whitespace in the screen -ls name output
+        screen_pattern = re.compile(r"([0-9]{3,6})\.(\w+).+(\(Detached\)|\(Attached\))", re.MULTILINE)
         matched_screens = screen_pattern.findall(screen_list)
+        matched_screens = list(set(matched_screens))
 
         # Select the screens to return
-        screens = []
+        screens = list()
         for screen_id, screen_name, attach_status in matched_screens:
-            add_screen = True
-            if exact_name_match and not screen_name == name:
-                add_screen = False
+            add_screen = False if exact_name_match and not screen_name == name else True
 
             if add_screen:
                 screen = (screen_id, screen_name, True if attach_status == "(Detached)" else False)
@@ -130,7 +129,7 @@ class Screen:
         if level > 1:
             terminal.send('a')
         terminal.sendcontrol('d')
-        time.sleep(wait_period)
+        time.sleep(Screen.wait_period)
 
     @classmethod
     def detach_nested(cls, terminal: pexpect.spawn, depth: int = 1, terminate: bool = False) -> None:

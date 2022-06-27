@@ -23,15 +23,16 @@ class ConfigsParser:
     def __init__(self, configs: dict):
         self._configs = validate_schema(document=configs, schema=ConfigsParser.config_schema)
 
-    def get_cluster_config(self) -> Tuple[str, str, List[str], bool]:
+    def get_cluster_config(self) -> Tuple[str, str, List[str], List[str], bool]:
 
         cluster = self._configs['cluster']
         cluster_name = cluster['id']
         ssh_alias = cluster.get('host', None)
         batch_jobs = format_input_to_list(cluster.get('batch_jobs', list()))
+        tunnels = format_input_to_list(cluster.get('tunnels', list()))
         setup = cluster.get('setup', False)
 
-        return cluster_name, ssh_alias, batch_jobs, setup
+        return cluster_name, ssh_alias, batch_jobs, tunnels, setup
 
     def get_batch_job_configs(self, batch_job: str) -> dict:
         return self._configs['batch_jobs'][batch_job]
@@ -82,6 +83,7 @@ class ConfigsParser:
 
         return singularity_configs
 
+    # TODO: Add possibility for jupyter lab and R
     def get_jupyter_configs(self, batch_job: str) -> dict:
 
         jupyter_configs = dict()

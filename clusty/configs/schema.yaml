@@ -5,19 +5,23 @@ cluster:
     id:
       type: string
       allowed:
-        - leonhardmed
         - leomed1
         - leomed2
     host:
       type: string
       required: False
-    setup:
-      type: boolean
-      default: False
     batch_jobs:
       type: list
       schema:
         type: string
+    tunnels:
+      type: list
+      required: False
+      schema:
+        type: string
+    setup:
+      type: boolean
+      default: False
 
 batch_jobs:
   type: dict
@@ -73,5 +77,14 @@ batch_jobs:
         type: dict
         required: False
         schema:
+          flavor:
+            type: string
+            required: False
+            allowed:
+              - notebook
+              - lab
+              - R
+            default: notebook
           port:
             type: integer
+            required: True
