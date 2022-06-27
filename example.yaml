@@ -2,7 +2,7 @@
 
 # Cluster definition: define which cluster the user wants to use
 cluster:
-  id: leomed                      # Identifies the class to be used for login and other procedures
+  id: leomed2                     # Identifies the class to be used for login and other procedures
   host: medinfmk                  # Name of ssh host to use to connect to (not required: default is set by cluster class)
   setup: False                    # Define if the setup of the cluster in the ssh local file is necessary (not required)
   batch_jobs:                     # List of batch jobs that can be launched in parallel on the cluster
@@ -12,14 +12,14 @@ cluster:
 # Batch jobs definition
 batch_jobs:
   jupyter:                        # Some identifier for the batch job - used to name the screen where this is launched
-    id: notebook                  # Name to be used for the screen to identify it (defaults to the batch_job name)
+    screen: notebook              # Name to be used for the screen to identify it (defaults to the batch_job name)
     duration: 1                   # Duration of the batch job in hours # TODO: Get IP address after starting batch job., so that it can be used for all tunnels to a batch job
     cpu: 1                        # Number of CPU cores requested
     memory: 10                    # Memory required per core in GB
-    gpu: 0                        # Number of GPUs attached to batch job
+    gpu: 1                        # Number of GPUs attached to batch job
     gpu_model: GeForceGTX1080Ti   # GPU model used
     env:                          # Environment variables that need to be available in the batch job (works with $vars)
-      - PROJECT_DIR=/cluster/dataset/medinfmk/IFI_JB_001_OSMICI
+      - PROJECT_DIR=/cluster/work/medinfmk/IFI_JB_001_OSMICI
       - PYTHONPATH=$PYTHONPATH:/cluster/home/mberchier/custom_packages/lib/python3.8/site-packages
     run:                          # Series of commands to run in the batch screen
       - SINGULARITY               # Run the singularity command (special flag)
@@ -32,3 +32,19 @@ batch_jobs:
         - $PROJECT_DIR:/opt/project   # Directories binding
     jupyter:                      # TODO: add possibility for choosing lab vs. notebook command, choosing home dir, r/py
       port: 8102                  # Tunnelling binding port
+
+  manual:
+    duration: 10
+    cpu: 2
+    memory: 5
+    env:
+      - PROJECT_DIR=/cluster/work/medinfmk/IFI_JB_001_OSMICI
+    run:
+      - SINGULARITY
+      - cd /opt/project
+      - JUPYTER
+    singularity:
+      image: $PROJECT_DIR/containers/schupbach.img
+      home: $HOME
+      bindings:
+        - $PROJECT_DIR:/opt/project

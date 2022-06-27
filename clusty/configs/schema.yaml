@@ -6,7 +6,8 @@ cluster:
       type: string
       allowed:
         - leonhardmed
-        - leomed
+        - leomed1
+        - leomed2
     host:
       type: string
       required: False
@@ -23,8 +24,9 @@ batch_jobs:
   valuesrules:
     type: dict
     schema:
-      id:
+      screen:
         type: string
+        required: False
       duration:
         type: integer
         default: 24

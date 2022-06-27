@@ -21,7 +21,7 @@ class LeoMed2(Cluster):
 
     def __init__(self, ssh_alias: str = "medinfmk"):
         super().__init__(cluster_id="leomed2",
-                         name="Leomed 2.0",
+                         name="LeonhardMed 2.0",
                          host_address="login-medinfmk.leonhard.ethz.ch",
                          ssh_alias=ssh_alias)
 
@@ -48,7 +48,7 @@ class LeoMed2(Cluster):
         print(f"ssh-config: setup of {self._name} completed.")
 
     def login(self, ssh_alias: str = None, binding: str = None, name: str = None) -> str:
-        """Login to the LeonhardMed cluster"""
+        """Login to the LeonhardMed 2.0 cluster"""
 
         ssh_alias = "medinfmk" if ssh_alias is None else ssh_alias
 
@@ -82,7 +82,7 @@ class LeoMed2(Cluster):
             # Password
             i = 0
             while i < 3 and not password_success and verification_code_success:
-                password = getpass.getpass('ETHZ password: ')
+                password = getpass.getpass('Your ETH Zurich password: ')
                 terminal.sendline(password)
                 response = terminal.expect_exact(['Welcome', 'password', 'Permission denied'])
                 password_success = (response == 0)
@@ -116,6 +116,8 @@ class LeoMed2(Cluster):
         Requires a screen name, for a screen that is already logged in to LeoMed
         """
 
+        # TODO: Check how to use the GPU model
+
         if gpu == 0:
             cmd = f"srun --time {duration}:00:00 --cpus-per-task {cpu} --mem-per-cpu {memory} --partition gpu " \
                   f"--gres gpu:{gpu} --pty bash"
@@ -126,7 +128,7 @@ class LeoMed2(Cluster):
         terminal = Screen.attach_nested(screens=screens[:-1])
         batch_screen = Screen.create(name=screens[-1], terminal=terminal)
         terminal.sendline(f"screen -r {batch_screen}")
-        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=LeonhardMed.wait_period)
+        terminal.expect_list([pexpect.EOF, pexpect.TIMEOUT], timeout=LeoMed2.wait_period)
 
         # Launch the batch process
         print(f"Launching batch job on {self._name} in screen '{batch_screen}'...")

@@ -4,6 +4,7 @@ venv
 
 # Testing
 .pytest_cache
+.DS_Store
 
 # Documentation
 docs/build/
